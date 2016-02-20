@@ -1,0 +1,41 @@
+<?php 
+$messages = $this->messages;
+?>
+
+<?php $this->placeholder('sidebar_left')->captureStart() ?>
+<?php $this->placeholder('sidebar_left')->captureEnd() ?>
+
+<?php $this->placeholder('sidebar_right')->captureStart() ?>
+<?php $this->placeholder('sidebar_right')->captureEnd() ?>
+
+<div>
+	<div >
+		<form id="bcrypt" method="post">
+			<label>
+				<span>Cost:</span>
+				<select name="cost">
+					<?php 
+						for($i = 4; $i <= 31; $i++) {
+							$selected = ($i == $cost) ? ' selected' : '';
+							echo '<option value="' . $i . '"' . $selected . '>' . $i . '</option>';
+						}
+					?>
+				</select>
+			</label>
+			<br>
+			<label>
+				<span>Password:</span>
+				<input type="text" name="password">
+			</label>
+			<input type="submit" value="Generate" name="submit">
+		</form>
+	</div>
+	
+	<?php if(isset($this->hash)): ?>
+		<hr>
+		<div>
+			Hash: <?php echo $this->hash ?><br>
+			Time: <?php echo $this->time ?>
+		</div>
+	<?php endif; ?>
+</div>

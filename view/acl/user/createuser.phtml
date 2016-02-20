@@ -1,0 +1,27 @@
+<?php 
+$access = $this->access;
+
+
+?>
+
+<?php $this->placeholder('sidebar_left')->captureStart() ?>
+<?php $this->placeholder('sidebar_left')->captureEnd() ?>
+
+<?php $this->placeholder('sidebar_right')->captureStart() ?>
+<?php $this->placeholder('sidebar_right')->captureEnd() ?>
+
+
+
+<div class="form">
+<h3><?php echo $group->name ?></h3>
+
+<?php
+$form = $this->form;
+$form->prepare();
+echo $this->form()->openTag($form);
+echo $this->formcollection($form);
+echo $this->form()->closeTag($form);
+
+?>
+
+</div>

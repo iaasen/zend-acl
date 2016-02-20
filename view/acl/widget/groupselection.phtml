@@ -1,0 +1,24 @@
+<?php 
+$user = $this->user;
+?>
+
+<?php if($user):  // User logged in ?>
+<div class="panel panel-default">
+	<div class="panel-body">
+		<span class="badge">Bruker</span><br>
+		&nbsp;&nbsp;<?php echo $user->name ?><br>
+		<span class="badge">Firma</span><br>
+		&nbsp;&nbsp;<?php if(isset($group->name)) echo $group->name; ?>
+	</div>
+	<?php if(count($user->access) > 1): ?>
+		<div class="panel-footer">
+			<div class="btn-group btn-group-justified">
+				<a class="btn btn-default btn-sm" href="/user/selectgroup">Velg annet firma</a>
+			</div>
+		</div>
+	<?php endif; ?>
+		
+</div>
+
+<?php endif; ?>
+

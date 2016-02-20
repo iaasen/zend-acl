@@ -1,0 +1,36 @@
+<?php
+$form = $this->form;
+
+
+$title = $this->translate('User');
+$this->headTitle($title);
+
+//$form->setAttribute('action', $this->url('user', array('action' => 'edit')));
+$form = $this->makeFormHorizontal($form);
+$this->form($form, \TwbBundle\Form\View\Helper\TwbBundleForm::LAYOUT_HORIZONTAL);
+
+
+
+//$form->setAttribute('action', $this->url('unit', array('action' => 'edit')));
+//$form->prepare();
+//~r($form->get('access_level')->getAttributes());
+?>
+<h1><?=$this->escapeHtml($title)?></h1>
+
+<div class="form">
+	<?php
+	echo $this->form()->openTag($form);
+	echo $this->formCollection($form);
+// 	echo $this->formRow($form->get('username'));
+// 	echo $this->formRow($form->get('name'));
+// 	echo $this->formRow($form->get('email'));
+// 	echo $this->formRow($form->get('access_level'));
+// 	echo '<h3>Endre passord</h3>';
+// 	echo $this->formRow($form->get('old_password'));
+// 	echo $this->formRow($form->get('new_password'));
+// 	echo $this->formRow($form->get('new_password_confirm'));
+	
+// 	echo $this->formRow($form->get('submit'));
+	echo $this->form()->closeTag();
+	?>
+</div>

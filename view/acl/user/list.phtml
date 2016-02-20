@@ -1,0 +1,75 @@
+<?php 
+$currentUser = $this->currentUser;
+$users = $this->users;
+$group = $this->group;
+?>
+
+<?php $this->placeholder('sidebar_left')->captureStart() ?>
+<?php $this->placeholder('sidebar_left')->captureEnd() ?>
+
+<?php $this->placeholder('sidebar_right')->captureStart() ?>
+<?php $this->placeholder('sidebar_right')->captureEnd() ?>
+
+
+<h1>
+	<span class="label label-default"><?php echo $group->group ?></span>
+	<?php echo $group->name ?>
+</h1> 
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<b>Brukere</b>
+		<div class="btn-group pull-right">
+			<?php if($currentUser->access[$group->group]['access_level'] >= 4): ?>
+				<a class="btn btn-default btn-sm" disabled="disabled" href="/user/createuser/<?php echo $group->id ?>">Ny bruker</a>
+				<a class="btn btn-default btn-sm" href="/user/createsoapuser/<?php echo $group->id ?>">Ny Vismakonto</a>
+				<a class="btn btn-primary btn-sm" href="/user/editaccess/<?php echo $group->id ?>">Rediger tilgang</a>
+			<?php else: ?>
+				<a class="btn btn-default btn-sm" disabled="disabled">Ny bruker</a>
+				<a class="btn btn-primary btn-sm" disabled="disabled">Rediger tilgang</a>
+			<?php endif; ?>
+		</div>
+		
+	</div>
+	<table class="table users">
+		<tr>
+			<th>Type</th>
+			<th>Brukernavn</th>
+			<th>Navn</th>
+			<th>E-post</th>
+			<th>Tilgang</th>
+			<th></th>
+		</tr>
+		<?php
+			foreach($this->users AS $user):
+				if(isset($user->access[$group->group])) :
+				?>
+					<tr>
+						<td><?php echo $this->translate($user::$login_types[$user->logintype]) ?></td>
+						<td><?php echo $user->username ?></td>
+						<td><?php echo $user->name ?></td>
+						<td><?php echo $user->email ?></td>
+						<td>
+						<?php
+							echo $this->translate($user::$access_level[$user->access[$group->group]['access_level']]);
+							echo ($user->access[$group->group]['onnshop']) ? ', Sende bestilling' : '';
+						?>
+						</td>
+						<td>
+							<div class="btn-group">
+								<a class="btn btn-primary btn-xs" href="/user/edit/<?php echo $user->id ?>">Rediger</a>
+							</div>
+						</td>
+					</tr>
+				<?php 
+				endif;
+			endforeach;
+		?>
+	</table>	
+
+</div>
+
+<br>
+<br>
+
+

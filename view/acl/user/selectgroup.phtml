@@ -1,0 +1,31 @@
+<?php 
+// $menu = array(
+$redirect = $this->redirect;
+$user = $this->user;
+$groups = $this->groups;
+?>
+
+<?php $this->placeholder('sidebar_left')->captureStart() ?>
+<?php $this->placeholder('sidebar_left')->captureEnd() ?>
+
+<?php $this->placeholder('sidebar_right')->captureStart() ?>
+<?php $this->placeholder('sidebar_right')->captureEnd() ?>
+
+<h1>Velg firma</h1>
+
+<div class="form form-group">
+	<form class="form" method="post">
+	<input type="hidden" name="redirect" value="<?php echo $redirect ?>">
+			<label>Firma</label>
+			<select class="form-control" name=group value="<?php echo $user->current_group ?>" autofocus>
+				<?php
+				foreach($groups AS $group) {
+					$selected = ($group->group == $user->current_group) ? ' selected' : '';
+					echo '<option value="' . $group->group . '"' . $selected . '>' . $group->group . ' - ' . $group->name . '</option>' . "\n";
+				}
+				?>
+			</select><br>
+			<input type=submit value="Velg"><br>
+	</form>
+
+</div>

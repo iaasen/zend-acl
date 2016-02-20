@@ -1,0 +1,63 @@
+<?php 
+$access = $this->access;
+
+
+?>
+
+<?php $this->placeholder('sidebar_left')->captureStart() ?>
+<?php $this->placeholder('sidebar_left')->captureEnd() ?>
+
+<?php $this->placeholder('sidebar_right')->captureStart() ?>
+<?php $this->placeholder('sidebar_right')->captureEnd() ?>
+
+
+
+<div class="form">
+<h3><?php echo $group->name ?></h3>
+<form method="post">
+<input type="hidden" name="group" value="<?php echo $group->group ?>">
+<table class="table">
+	<tr>
+		<th>Navn</th>
+		<th>E-post</th>
+		<th>Tilgangsnivå</th>
+		<th>Sende bestilling</th>
+	</tr>
+	
+	<?php foreach($this->users AS $user): 
+		$id = $user->id;
+		$disabled = ($access[$user->id]) ? '' : ' disabled';
+	?>
+		<tr>
+			<td><?php echo $user->name ?></td>
+			<td><?php echo $user->email ?></td>
+			<td>
+				<select name="users[<?php echo $id ?>][access_level]"<?php echo $disabled ?>>
+				<?php
+					foreach($user::$access_level AS $key => $value) {
+						$selected = ($user->access[$group->group]['access_level'] == $key) ? ' selected="selected"' : '';
+						$disabledOption = ($currentUser->access[$group->group]['access_level'] <= $key) ? ' disabled' : '';
+						echo '<option value="' . $key . '"' . $selected . $disabledOption . '>' . $value . '</option>';
+					}
+				?>
+				</select>
+			</td>
+			<?php /*
+			<td>
+				<input type="hidden" name="users[<?php echo $id ?>][onnshop]" value=0>
+				<?php $checked = ($user->access[$group->group]['onnshop']) ? ' checked="checked"' : ''; ?>
+				<input type="checkbox" name="users[<?php echo $id ?>][onnshop]" value=1<?php echo $checked . $disabled ?>>
+			</td>
+			*/ ?>
+		
+		
+		</tr>
+	<?php endforeach; ?>
+	<tr>
+		<td class="text-right" colspan="4"><input class="btn btn-primary" type="submit" value="Lagre"></td>
+</table>
+
+
+
+</form>
+</div>

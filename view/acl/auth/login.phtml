@@ -1,0 +1,69 @@
+<?php 
+$messages = $this->messages;
+$form = $this->form;
+?>
+
+<?php $this->placeholder('sidebar_left')->captureStart() ?>
+<?php $this->placeholder('sidebar_left')->captureEnd() ?>
+
+<?php $this->placeholder('sidebar_right')->captureStart() ?>
+<?php $this->placeholder('sidebar_right')->captureEnd() ?>
+
+<div style="text-align: left">
+	<br>
+	<h3>Elfags prosjektkalkulator</h3>
+	<br>
+	<p>
+		Dette er en lukket tjeneste kun for medlemmer av Elfag.
+	</p>
+	<br>
+	<p>
+		Gyldige kontoer
+	</p>
+		<ul>
+		<li>elfag.no brukerkonto</li>
+		<li>Konto opprettet for Prosjektkalkulator</li>
+		</ul>
+	<br>
+	<br>
+		
+		<?php
+			$form->setAttribute('action', $this->url('authenticate'));
+			
+			/*
+			foreach($oform->getElements() AS $element) {
+				switch($element->getAttribute('type')) {
+					case 'submit':
+						$element->setOptions(array('label' => 'Logg inn','column-size' => 'sm-10 col-sm-offset-2'));
+						break;
+					case 'checkbox':
+						$element->setOptions(array('label' => 'Husk meg','column-size' => 'sm-10 col-sm-offset-2'));
+						break;
+					default:
+						$element->setOptions(array('column-size' => 'sm-10', 'label_attributes' => array('class' => 'col-sm-2')));
+						break;
+				}
+			}
+			*/
+			
+			echo $this->form($form);
+			
+			//$form->prepare();
+			//echo $this->form()->openTag($form);
+			//echo $this->formCollection($form);
+			//echo $this->form()->closeTag();
+		?> 
+	
+	<div>
+		<?php
+		if ($this->messages){
+			echo '<ul>';
+			foreach($this->messages as $message)
+			{
+				echo '<li>'.$message.'</li>';
+			}
+			echo '</ul>';
+		}
+		?>
+	</div>
+</div>

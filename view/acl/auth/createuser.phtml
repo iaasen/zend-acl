@@ -1,0 +1,50 @@
+<?php 
+$messages = $this->messages;
+?>
+
+<?php $this->placeholder('sidebar_left')->captureStart() ?>
+<?php $this->placeholder('sidebar_left')->captureEnd() ?>
+
+<?php $this->placeholder('sidebar_right')->captureStart() ?>
+<?php $this->placeholder('sidebar_right')->captureEnd() ?>
+
+<div style="text-align: center">
+	<br>
+	<h3>Velkommen til Elfags boligkalkulator.</h3>
+	<br>
+	<p>
+		Gyldige kontoer:
+		<ul>
+		<li>Onnshop brukernavn</li>
+		<li>Konto opprettet for Boligkalkulator</li>
+		</ul>
+	</p>
+	<br>
+	<br>
+	<div class="form">
+		<?php
+			$form = $this->form;
+		$form->setAttribute('action', $this->url(
+			'authenticate'
+		));
+		$form->prepare();
+		
+		echo $this->form()->openTag($form);
+		echo $this->formCollection($form);
+		echo $this->form()->closeTag();
+		?> 
+	</div>
+	
+	<div>
+		<?php
+		if ($this->messages){
+			echo '<ul>';
+			foreach($this->messages as $message)
+			{
+				echo '<li>'.$message.'</li>';
+			}
+			echo '</ul>';
+		}
+		?>
+	</div>
+</div>
