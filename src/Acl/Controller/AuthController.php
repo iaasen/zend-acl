@@ -17,7 +17,7 @@ class AuthController extends AbstractActionController {
 	protected $tables;
 	
 	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-		$o = $this->getServiceLocator()->get('viewhelpermanager')->get('menu')->mainMenu();
+		//$o = $this->getServiceLocator()->get('viewhelpermanager')->get('menu')->mainMenu();
 		return parent::onDispatch($e);
 	}
 	
