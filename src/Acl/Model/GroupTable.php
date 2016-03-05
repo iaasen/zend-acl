@@ -57,7 +57,7 @@ class GroupTable extends DbTable {
 	/**
 	 * 
 	 * @param mixed $id (int) Table id or (string) group name
-	 * @return Ambigous <multitype:, ArrayObject, NULL, \ArrayObject, \Zend\Db\ResultSet\mixed, unknown>
+	 * @return mixed
 	 */
 	public function getGroup($id) {
 		if(is_int($id)) {
