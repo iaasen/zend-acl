@@ -42,8 +42,8 @@ class Module implements AutoloaderProviderInterface {
 	}
 	
 	protected $whitelist = array(
-		'login',
-		'authenticate',
+		'auth/login',
+		'auth/authenticate',
 		'login/process/createuser',
 		'login/process/generatebcrypt',
 		'soap/soap',
@@ -87,7 +87,7 @@ class Module implements AutoloaderProviderInterface {
 			
 			$router = $e->getRouter();
 			$url = $router->assemble(array(), array(
-				'name'	=>	'login',
+				'name'	=>	'auth/login',
 			));
 				
 			$response = $e->getResponse();

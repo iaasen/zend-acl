@@ -7,6 +7,8 @@ class Group {
 		'id' => null,
 		'group' => null,
 		'name' => null,
+		'onninen_customer_id' => null,
+		'elfag_membership_number' => null,
 		'created' => null,
 	);
 	

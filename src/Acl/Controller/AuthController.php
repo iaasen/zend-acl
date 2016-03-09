@@ -30,16 +30,22 @@ class AuthController extends AbstractActionController {
 		
 		$_form = $this->getForm();
 		if(isset($redirect)) $_form->get('redirect')->setValue($redirect);
-		
-		return array(
+
+		$viewModel = new ViewModel([
 			'form'		=> $_form,
 			'messages'	=> $this->flashmessenger()->getMessages(),
-		);
+		]);
+		$viewModel->setTemplate('auth/login');
+		return $viewModel;
+//		return array(
+//			'form'		=> $_form,
+//			'messages'	=> $this->flashmessenger()->getMessages(),
+//		);
 	}
 	
 	public function authenticateAction() {
 		$_form = $this->getForm();
-		$_redirect = 'login';
+		$_redirect = 'auth/login';
 		
 		$_request = $this->getRequest();
 		if($_request->isPost()) {
@@ -100,7 +106,7 @@ class AuthController extends AbstractActionController {
 	}
 	
 	public function generatebcryptAction() {
-		$cost = $this->params()->fromPost('cost', 14);
+		$cost = $this->params()->fromPost('cost', 13);
 		$password = $this->params()->fromPost('password', null);
 		
 		$request = $this->getRequest();
@@ -120,8 +126,8 @@ class AuthController extends AbstractActionController {
 		$this->getSessionStorage()->forgetMe();
 		$this->getAuthService()->clearIdentity();
 		
-		$this->flashmessenger()->addMessage('You\'ve been logged out.');
-		return $this->redirect()->toRoute('login');
+		$this->flashmessenger()->addMessage('Du er logget ut');
+		return $this->redirect()->toRoute('auth/login');
 	}
 	
 	public function createuserAction() {

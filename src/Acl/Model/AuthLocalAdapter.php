@@ -21,10 +21,10 @@ class AuthLocalAdapter extends AbstractDbAdapter {
 		
 		if ($bcrypt->verify($this->credential, $resultIdentity[$this->credentialColumn])) {
 			$this->authenticateResultInfo['code'] = Result::SUCCESS;
-			$this->authenticateResultInfo['messages'][] = 'Authentication successful.';
+			$this->authenticateResultInfo['messages'][] = 'Authentication successful';
 		} else {
 			$this->authenticateResultInfo['code'] = Result::FAILURE_CREDENTIAL_INVALID;
-			$this->authenticateResultInfo['messages'][] = 'Supplied credential is invalid.';
+			$this->authenticateResultInfo['messages'][] = 'Supplied credential is invalid';
 		}
 		return $this->authenticateCreateAuthResult();
 	}

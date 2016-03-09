@@ -36,13 +36,13 @@ class AuthElfagAdapter extends AbstractAdapter {
 		$response = json_decode($response);
 
 		if(isset($response->status) && $response->status == 'success') {
-			return new Result(Result::SUCCESS, $this->identityPrefix . $this->identity, array("Authentication successful."));
+			return new Result(Result::SUCCESS, $this->identityPrefix . $this->identity, array("Authentication successful"));
 		}
 		else {
-			if($response->message == 'no user') return new Result(Result::FAILURE_IDENTITY_NOT_FOUND, null, array("User not found."));
-			if($response->message == 'no match') return new Result(Result::FAILURE_CREDENTIAL_INVALID, null, array("Supplied credential is invalid."));
+			if($response->message == 'no user') return new Result(Result::FAILURE_IDENTITY_NOT_FOUND, null, array("User not found"));
+			if($response->message == 'no match') return new Result(Result::FAILURE_CREDENTIAL_INVALID, null, array("Supplied credential is invalid"));
 		}
-		return new Result(Result::FAILURE_UNCATEGORIZED, null, array("Unexpected error."));
+		return new Result(Result::FAILURE_UNCATEGORIZED, null, array("Unexpected error"));
 	}
 	
 }

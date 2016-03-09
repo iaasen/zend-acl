@@ -1,21 +1,37 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2015-04-18 19:58+0100\n"
-"PO-Revision-Date: 2015-04-18 19:58+0100\n"
+"POT-Creation-Date: 2016-03-09 01:05+0100\n"
+"PO-Revision-Date: 2016-03-09 01:05+0100\n"
 "Last-Translator: Ingvar Aasen <iaasen@hotmail.com>\n"
 "Language-Team: \n"
 "Language: nb_NO\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.8.4\n"
 "X-Poedit-Basepath: .\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-KeywordsList: translate;_\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: ../src/Acl/Controller/UserController.php:326
+#: ../language/words.php:2
+msgid "Authentication successful"
+msgstr "Innlogging vellykket"
+
+#: ../language/words.php:3
+msgid "Supplied credential is invalid"
+msgstr "Feil brukernavn eller passord"
+
+#: ../language/words.php:4
+msgid "You have been logged out"
+msgstr ""
+
+#: ../language/words.php:5
+msgid "User not found"
+msgstr "Feil brukernavn eller passord"
+
+#: ../src/Acl/Controller/UserController.php:324
 #, php-format
 msgid "The username '%s' is not available. Suggesting a different username"
 msgstr "Brukernavnet '%s' er ikke tilgjengelig. Foreslår et annet brukernavn."
@@ -79,6 +95,9 @@ msgstr "Ny Vismakonto"
 #: ../view/acl/user/edit.phtml:5
 msgid "User"
 msgstr "Bruker"
+
+#~ msgid "You've been logged out"
+#~ msgstr "Du er logget ut"
 
 #~ msgid "New SOAP-user"
 #~ msgstr "Ny Vismakonto"

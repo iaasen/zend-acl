@@ -9,7 +9,6 @@ use Acl\Form\EditUserForm;
 use Acl\Form\EditSoapUserForm;
 use Acl\Form\EditTokenForm;
 use Acl\Model\User;
-use Priceestimator\View\Helper\MenuWidget;
 use Zend\Crypt\Password\Bcrypt;
 use General\Message;
 
@@ -26,7 +25,8 @@ class UserController extends AbstractActionController {
 	protected static $bcryptCost = 13;
 
 	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-		MenuWidget::mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
+		$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
+		//MenuWidget::mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
 		return parent::onDispatch($e);
 	}
 	
@@ -35,7 +35,8 @@ class UserController extends AbstractActionController {
 	}
 	
 	public function listAction() {
-		MenuWidget::settingsMenu('users');
+		$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->settingsMenu('users');
+		//MenuWidget::settingsMenu('users');
 		$user = $this->getTable('user')->getCurrentUser();
 		return new ViewModel(array(
 			'currentUser' => $user,
@@ -175,7 +176,8 @@ class UserController extends AbstractActionController {
 			}
 		}
 		$viewmodel = new ViewModel(array('form' => $form));
-		MenuWidget::settingsMenu('user');
+		$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->settingsMenu('users');
+		//MenuWidget::settingsMenu('user');
 
 		return $viewmodel;
 	}
