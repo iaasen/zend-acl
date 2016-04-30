@@ -3,12 +3,6 @@ use Acl\Controller\AuthController;
 use Acl\Controller\UserController;
 
 return [
-	'controllers' => [
-		'invokables' => [
-			AuthController::class => AuthController::class,
-			UserController::class => UserController::class,
-		],
-	],
 	'router' => [
 		'routes' => [
 			'auth' => [
@@ -86,6 +80,12 @@ return [
 			],
 		],
 	],
+	'controllers' => [
+		'invokables' => [
+			AuthController::class => AuthController::class,
+			UserController::class => UserController::class,
+		],
+	],
 	'translator' => [
 		'locale' => 'nb_NO',
 		'translation_file_patterns' => [
@@ -100,6 +100,12 @@ return [
 		'aliases' => [
 			'AclTable'	=> 'Acl\Model\UserTable',
 			'AuthService'	=> 'Acl\AuthService',
+			\Zend\Authentication\AuthenticationService::class => 'Acl\AuthService',
+		],
+	],
+	'view_helpers' => [
+		'aliases' => [
+			\Zend\Authentication\AuthenticationService::class => 'Acl\AuthService',
 		],
 	],
 	'view_manager' => [
