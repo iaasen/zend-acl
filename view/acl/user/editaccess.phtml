@@ -1,6 +1,9 @@
 <?php 
 $access = $this->access;
 
+$menuContainer = $this->navigation('navigation')->getContainer();
+$menuContainer->findOneBy('route', 'user/editaccess')->setActive();
+
 
 ?>
 

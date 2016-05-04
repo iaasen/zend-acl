@@ -15,7 +15,7 @@
 	<?php if(count($user->access) > 1): ?>
 		<div class="panel-footer">
 			<div class="btn-group btn-group-justified">
-				<a class="btn btn-default btn-sm" href="/user/selectgroup">Velg annet firma</a>
+				<a class="btn btn-default btn-sm" href="<?= $this->url('user/selectGroup') ?>">Velg annet firma</a>
 			</div>
 		</div>
 	<?php endif; ?>

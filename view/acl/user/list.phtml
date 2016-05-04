@@ -22,8 +22,8 @@ $group = $this->group;
 		<div class="btn-group pull-right">
 			<?php if($currentUser->access[$group->group]['access_level'] >= 4): ?>
 				<a class="btn btn-default btn-sm" disabled="disabled" href="/user/createuser/<?php echo $group->id ?>">Ny bruker</a>
-				<a class="btn btn-default btn-sm" href="/user/createsoapuser/<?php echo $group->id ?>">Ny Vismakonto</a>
-				<a class="btn btn-primary btn-sm" href="/user/editaccess/<?php echo $group->id ?>">Rediger tilgang</a>
+				<a class="btn btn-default btn-sm" href="<?= $this->url('user/createSoapUser') ?>">Ny Vismakonto</a>
+				<a class="btn btn-primary btn-sm" href="<?= $this->url('user/editAccess', ['id' => $group->id]) ?>">Rediger tilgang</a>
 			<?php else: ?>
 				<a class="btn btn-default btn-sm" disabled="disabled">Ny bruker</a>
 				<a class="btn btn-primary btn-sm" disabled="disabled">Rediger tilgang</a>
@@ -57,7 +57,7 @@ $group = $this->group;
 						</td>
 						<td>
 							<div class="btn-group">
-								<a class="btn btn-primary btn-xs" href="/user/edit/<?php echo $user->id ?>">Rediger</a>
+								<a class="btn btn-primary btn-xs" href="<?= $this->url('user/edit', ['id' => $user->id]) ?>">Rediger</a>
 							</div>
 						</td>
 					</tr>

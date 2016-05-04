@@ -25,7 +25,7 @@ class UserController extends AbstractActionController {
 	protected static $bcryptCost = 13;
 
 	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-		$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
+		//$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
 		//MenuWidget::mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
 		return parent::onDispatch($e);
 	}
@@ -35,7 +35,7 @@ class UserController extends AbstractActionController {
 	}
 	
 	public function listAction() {
-		$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->settingsMenu('users');
+		//$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->settingsMenu('users');
 		//MenuWidget::settingsMenu('users');
 		$user = $this->getTable('user')->getCurrentUser();
 		return new ViewModel(array(
@@ -176,30 +176,31 @@ class UserController extends AbstractActionController {
 			}
 		}
 		$viewmodel = new ViewModel(array('form' => $form));
-		$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->settingsMenu('users');
+		//$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->settingsMenu('users');
 		//MenuWidget::settingsMenu('user');
 
 		return $viewmodel;
 	}
 		
 	public function editaccessAction() {
-		$id = (int) $this->params()->fromRoute('id', null);
-		if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
-		
+		$groupName = (int) $this->params()->fromRoute('id', null);
+		if(!$groupName) $groupName = $this->getTable('user')->getCurrentUser()->current_group;
+		if($groupName == null) $this->redirect()->toRoute('user', array('action' => 'list'));
+
 		$request = $this->getRequest();
 		if ($request->isPost()) {
 			$post = $request->getpost()->toArray();
 			foreach($post['users'] AS $key => $value) {
 				$user = $this->getTable('user')->getUser((int) $key);
 				if($user !== false) {
-					$user->updateAccess($post['group'], $value);
-					$this->getTable('user')->saveUserAccess($user, $post['group']);
+					$user->updateAccess($groupName, $value);
+					$this->getTable('user')->saveUserAccess($user, $groupName);
 				}
 			}
 			$this->redirect()->toRoute('user', array('action' => 'list'));
 		}
 		
-		$group = $this->getTable('group')->getGroup($id);
+		$group = $this->getTable('group')->getGroup($groupName);
 		
 		$users = $this->getTable('user')->getUsers();
 		// List only users with access to this group
@@ -215,7 +216,7 @@ class UserController extends AbstractActionController {
 			$access[$user->id] = $this->getTable('user')->accessToSaveAccess($user, $group->group);
 		}
 		
-		MenuWidget::settingsMenu('users');
+		//MenuWidget::settingsMenu('users');
 		return new ViewModel(array(
 			'users' => $editusers,
 			'currentUser' => $this->getTable('user')->getCurrentUser(),
@@ -287,13 +288,13 @@ class UserController extends AbstractActionController {
 		));
 	}
 	
-	public function createsoapuserAction() {
-		$id = (int) $this->params()->fromRoute('id', null);
-		if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
-		
-		$group = $this->getTable('group')->getGroup((int) $id);
+	public function createSoapUserAction() {
+		$id = $this->params()->fromRoute('id', null);
 		$currentUser = $this->getTable('user')->getCurrentUser();
-		
+		if(!$id) $id = $currentUser->current_group;
+		if($id == null) $this->redirect()->toRoute('user');
+		$group = $this->getTable('group')->getGroup($id);
+
 		$user = new User();
 		$user->username = preg_replace('/^elfag-/', '', $group->group, 1) . '-visma';
 		$user->password = substr(md5(rand()), 0, 16);
@@ -350,7 +351,7 @@ class UserController extends AbstractActionController {
 		));
 	}
 	
-	public function selectgroupAction() {
+	public function selectGroupAction() {
 		$redirect = '';
 		if(isset($_POST['redirect'])) $redirect = $_POST['redirect'];
 		elseif(isset($_GET['redirect'])) $redirect = $_GET['redirect'];

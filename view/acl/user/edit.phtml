@@ -5,16 +5,23 @@ $form = $this->form;
 $title = $this->translate('User');
 $this->headTitle($title);
 
-//$form->setAttribute('action', $this->url('user', array('action' => 'edit')));
 $form = $this->makeFormHorizontal($form);
 $this->form($form, \TwbBundle\Form\View\Helper\TwbBundleForm::LAYOUT_HORIZONTAL);
 
+$menuContainer = $this->navigation('navigation')->getContainer();
+$menuContainer->findOneBy('route', 'user/editaccess')->setActive();
 
-
-//$form->setAttribute('action', $this->url('unit', array('action' => 'edit')));
-//$form->prepare();
-//~r($form->get('access_level')->getAttributes());
 ?>
+
+
+<?php $this->placeholder('sidebar_left')->captureStart() ?>
+<?php $this->placeholder('sidebar_left')->captureEnd() ?>
+
+<?php $this->placeholder('sidebar_right')->captureStart() ?>
+<?php $this->placeholder('sidebar_right')->captureEnd() ?>
+
+
+
 <h1><?=$this->escapeHtml($title)?></h1>
 
 <div class="form">

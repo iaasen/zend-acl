@@ -7,6 +7,11 @@ $this->headTitle($title);
 $form = $this->makeFormHorizontal($form);
 $this->form($form, \TwbBundle\Form\View\Helper\TwbBundleForm::LAYOUT_HORIZONTAL);
 
+$menuContainer = $this->navigation('navigation')->getContainer();
+
+$menuContainer->findOneBy('route', 'user/createSoapUser')->setActive();
+
+
 ?>
 
 <?php $this->placeholder('sidebar_left')->captureStart() ?>
