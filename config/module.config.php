@@ -68,6 +68,12 @@ return [
 						'default_value' => '',
 						'access_level' => 3,
 					],
+					'elfag_membership_number' => [
+						'label' => 'Elfag medlemsnummer',
+						'type' => 'string',
+						'default_value' => null,
+						'access_level' => 3,
+					],
 				],
 			],
 		], 
