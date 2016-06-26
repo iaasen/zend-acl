@@ -48,7 +48,9 @@ class Module implements AutoloaderProviderInterface {
 		'login/process/generatebcrypt',
 		'soap/soap',
 		'soapwsdl/wsdl',
-		'index/credits'
+		'index/credits',
+		'claim/email',
+		'claimemail'
 	);
 	
 	public function onBootstrap(MvcEvent $e)
