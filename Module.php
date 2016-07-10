@@ -50,7 +50,8 @@ class Module implements AutoloaderProviderInterface {
 		'soapwsdl/wsdl',
 		'index/credits',
 		'claim/email',
-		'claimemail'
+		'claimemail',
+		'claim/emailFile',
 	);
 	
 	public function onBootstrap(MvcEvent $e)
