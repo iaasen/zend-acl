@@ -24,6 +24,17 @@ class UserController extends AbstractActionController {
 	protected $tables;
 	protected static $bcryptCost = 13;
 
+	/** @var  \Acl\Model\User */
+	protected $currentUser;
+	/** @var  \Acl\Model\GroupTable */
+	protected $groupTable;
+
+	public function __construct($currentUser, $groupTable)
+	{
+		$this->currentUser = $currentUser;
+		$this->groupTable = $groupTable;
+	}
+
 	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
 		//$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
 		//MenuWidget::mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
@@ -31,17 +42,17 @@ class UserController extends AbstractActionController {
 	}
 	
 	public function viewAction() {
-		$user = $this->getTable('user')->getCurrentUser();
+		$user = $this->currentUser;
 	}
 	
 	public function listAction() {
 		//$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->settingsMenu('users');
 		//MenuWidget::settingsMenu('users');
-		$user = $this->getTable('user')->getCurrentUser();
+		$user = $this->currentUser;
 		return new ViewModel(array(
 			'currentUser' => $user,
 			'users' => $this->getTable('user')->getUsers(),
-			'group' => $this->getTable('group')->getGroup($user->current_group),
+			'group' => $this->groupTable->getGroup($user->current_group),
 			
 		));
 	}
@@ -52,8 +63,8 @@ class UserController extends AbstractActionController {
 		if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
 		
 		$user = $this->getTable('user')->getUser($id);
-		$currentUser = $this->getTable('user')->getCurrentUser();
-		$group = $this->getTable('group')->getGroup($currentUser->current_group);
+		$currentUser = $this->currentUser;
+		$group = $this->groupTable->getGroup($currentUser->current_group);
 		
 		switch($user->logintype) {
 			case 'soap':
@@ -184,7 +195,7 @@ class UserController extends AbstractActionController {
 		
 	public function editaccessAction() {
 		$groupName = (int) $this->params()->fromRoute('id', null);
-		if(!$groupName) $groupName = $this->getTable('user')->getCurrentUser()->current_group;
+		if(!$groupName) $groupName = $this->currentUser->current_group;
 		if($groupName == null) $this->redirect()->toRoute('user', array('action' => 'list'));
 
 		$request = $this->getRequest();
@@ -200,7 +211,7 @@ class UserController extends AbstractActionController {
 			$this->redirect()->toRoute('user', array('action' => 'list'));
 		}
 		
-		$group = $this->getTable('group')->getGroup($groupName);
+		$group = $this->groupTable->getGroup($groupName);
 		
 		$users = $this->getTable('user')->getUsers();
 		// List only users with access to this group
@@ -219,7 +230,7 @@ class UserController extends AbstractActionController {
 		//MenuWidget::settingsMenu('users');
 		return new ViewModel(array(
 			'users' => $editusers,
-			'currentUser' => $this->getTable('user')->getCurrentUser(),
+			'currentUser' => $this->currentUser,
 			'group' => $group,
 			'access' => $access,
 		));
@@ -229,8 +240,8 @@ class UserController extends AbstractActionController {
 		$id = (int) $this->params()->fromRoute('id', null);
 		if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
 		
-		$group = $this->getTable('group')->getGroup((int) $id);
-		$currentUser = $this->getTable('user')->getCurrentUser();
+		$group = $this->groupTable->getGroup((int) $id);
+		$currentUser = $this->currentUser;
 		
 		if(!$this->getTable('user')->accessToCreateUser($group))
 			$this->redirect()->toRoute('user', array('action' => 'list'));
@@ -282,18 +293,19 @@ class UserController extends AbstractActionController {
 		}
 		
 		return new ViewModel(array(
-			'currentUser' => $this->getTable('user')->getCurrentUser(),
+			'currentUser' => $this->currentUser,
 			'group' => $group,
 			'form' => $form,
 		));
 	}
+
+
 	
 	public function createSoapUserAction() {
 		$id = $this->params()->fromRoute('id', null);
-		$currentUser = $this->getTable('user')->getCurrentUser();
-		if(!$id) $id = $currentUser->current_group;
+		if(!$id) $id = $this->currentUser->current_group;
 		if($id == null) $this->redirect()->toRoute('user');
-		$group = $this->getTable('group')->getGroup($id);
+		$group = $this->groupTable->getGroup($id);
 
 		$user = new User();
 		$user->username = preg_replace('/^elfag-/', '', $group->group, 1) . '-visma';
@@ -345,7 +357,7 @@ class UserController extends AbstractActionController {
 		}
 		
 		return new ViewModel(array(
-			'currentUser' => $this->getTable('user')->getCurrentUser(),
+			'currentUser' => $this->currentUser,
 			'group' => $group,
 			'form' => $form,
 		));
@@ -356,8 +368,8 @@ class UserController extends AbstractActionController {
 		if(isset($_POST['redirect'])) $redirect = $_POST['redirect'];
 		elseif(isset($_GET['redirect'])) $redirect = $_GET['redirect'];
 		
-		$user = $this->getTable('user')->getCurrentUser();
-		$groups = $this->getTable('group')->getGroups();
+		$user = $this->currentUser;
+		$groups = $this->groupTable->getGroups();
 		
 		// Only one group available
 		if(count($groups) == 1) {

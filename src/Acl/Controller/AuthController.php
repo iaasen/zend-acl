@@ -72,7 +72,7 @@ class AuthController extends AbstractActionController {
 					$user = $this->getTable('user')->getUser($this->getAuthService()->getIdentity());
 					
 					if(!$user) { // Probably elfag-user and it's the first login
-						return $this->redirect()->toRoute('createuser');
+						return $this->redirect()->toRoute('createUser');
 					}
 					
 					

@@ -13,7 +13,9 @@ return [
 	'controllers' => [
 		'invokables' => [
 			AuthController::class => AuthController::class,
-			UserController::class => UserController::class,
+		],
+		'factories' => [
+			UserController::class => \Acl\Controller\UserControllerFactory::class,
 		],
 	],
 	'view_helpers' => [
@@ -126,16 +128,6 @@ return [
 								'action' => 'generatebcrypt',
 							],
 						],
-					],
-				],
-			],
-			'createuser' => [
-				'type'    => 'literal',
-				'options' => [
-					'route'    => '/createuser',
-					'defaults' => [
-						'controller' => 'Settings\Controller\Settings',
-						'action'     => 'addelfaguser',
 					],
 				],
 			],
