@@ -27,6 +27,7 @@ class AuthElfagAdapter extends AbstractAdapter {
 	 * @throws \Zend\Authentication\Adapter\Exception\ExceptionInterface If authentication cannot be performed
 	 */
 	public function authenticate() {
+		$this->identity = strtolower($this->identity);
 		$ch = curl_init($this->url);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
