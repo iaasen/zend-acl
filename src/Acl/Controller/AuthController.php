@@ -29,6 +29,7 @@ class AuthController extends AbstractActionController {
 		}
 		
 		$_form = $this->getForm();
+		$_form->setAttribute('action', $this->url()->fromRoute('auth/authenticate'));
 		if(isset($redirect)) $_form->get('redirect')->setValue($redirect);
 
 		$viewModel = new ViewModel([
@@ -54,9 +55,9 @@ class AuthController extends AbstractActionController {
 				$authService = $this->getAuthService();
 				$authService->setIdentity($_request->getPost('username'));
 				$authService->setCredential($_request->getPost('password'));
-				
+
 				$_result = $authService->authenticate();
-				
+
 				foreach($_result->getMessages() as $message) {
 					$this->flashmessenger()->addMessage($message);
 				}

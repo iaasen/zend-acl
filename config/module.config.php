@@ -3,6 +3,9 @@ use Acl\Controller\AuthController;
 use Acl\Controller\UserController;
 
 return [
+	'acl' => [
+		'superuser_only' => false,
+	],
 	'service_manager' => [
 		'aliases' => [
 			'AclTable'	=> 'Acl\Model\UserTable',
@@ -200,6 +203,8 @@ return [
 	'navigation' => [
 		'default' => [
 			'settings' => [
+				'label' => 'Innstillinger',
+				'route' => 'user/list',
 				'pages' => [
 					'user' => [
 						'label' => 'Brukere',
