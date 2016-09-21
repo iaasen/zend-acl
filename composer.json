@@ -1,0 +1,26 @@
+{
+  "name": "iaasen/zend-acl",
+  "description": "Zend authentication implementation",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Ingvar Aasen",
+      "email": "iaasen@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=5.6",
+    "zendframework/zendframework": ">=2.2.9"
+  },
+  "autoload": {
+    "psr-0": {
+      "Acl\\": "src/"
+    },
+    "classmap": [
+      "Module.php"
+    ]
+  }
+}
+
+
