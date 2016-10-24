@@ -66,6 +66,9 @@ class Module implements AutoloaderProviderInterface {
 		$list = $this->whitelist;
 	
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, function($e) use ($list, $acl) {
+			/** @var \Bugsnag\Client $bugsnag */
+			global $bugsnag;
+
 			if($e->getRequest() instanceof \Zend\Console\Request) return;
 			
 			$match = $e->getRouteMatch();
@@ -77,6 +80,11 @@ class Module implements AutoloaderProviderInterface {
 			}
 				
 			if($acl->hasIdentity()) {
+				$bugsnag->registerCallback(function (\Bugsnag\Report $report) use ($acl) {
+					$report->setUser([
+						'username' => $acl->getIdentity(),
+					]);
+				});
 				return;
 			}
 			

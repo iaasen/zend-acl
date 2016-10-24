@@ -6,7 +6,7 @@ use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Sql\Select;
-use General\Message;
+use Oppned\Message;
 
 class UserTable extends DbTable {
 	//protected $serviceLocator;

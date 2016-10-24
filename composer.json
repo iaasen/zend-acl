@@ -14,8 +14,8 @@
     "zendframework/zendframework": ">=2.2.9"
   },
   "autoload": {
-    "psr-0": {
-      "Acl\\": "src/"
+    "psr-4": {
+      "Acl\\": "src/Acl/"
     },
     "classmap": [
       "Module.php"
