@@ -7,23 +7,39 @@ return [
 		'superuser_only' => false,
 	],
 	'service_manager' => [
+		'invokables' => [
+			\Acl\Form\LoginForm::class => \Acl\Form\LoginForm::class,
+			\Acl\Model\Group::class => \Acl\Model\Group::class,
+			\Acl\Model\User::class => \Acl\Model\User::class,
+		],
+		'factories' => [
+			\Acl\Model\AclStorage::class => \Acl\Model\AclStorageFactory::class,
+			\Acl\Service\AuthService::class => \Acl\Service\AuthServiceFactory::class,
+			\Acl\Service\GroupTable::class => \Acl\Service\GroupTableFactory::class,
+			\Acl\Service\UserTable::class => \Acl\Service\UserTableFactory::class,
+		],
 		'aliases' => [
-			'AclTable'	=> 'Acl\Model\UserTable',
-			'AuthService'	=> 'Acl\AuthService',
-			\Zend\Authentication\AuthenticationService::class => 'Acl\AuthService',
+			'Acl\AuthService' => \Acl\Service\AuthService::class,
+			'Acl\Model\AclTable' => \Acl\Service\UserTable::class,
+			'AuthService'	=> \Acl\Service\AuthService::class ,
+			'Group' => \Acl\Model\Group::class,
+			'GroupTable' => \Acl\Service\GroupTable::class,
+			'User' => \Acl\Model\User::class,
+			'UserTable' => \Acl\Service\UserTable::class,
+			\Zend\Authentication\AuthenticationService::class => \Acl\Service\AuthService::class,
 		],
 	],
 	'controllers' => [
 		'invokables' => [
-			AuthController::class => AuthController::class,
 		],
 		'factories' => [
+			AuthController::class => \Acl\Controller\AuthControllerFactory::class,
 			UserController::class => \Acl\Controller\UserControllerFactory::class,
 		],
 	],
 	'view_helpers' => [
 		'aliases' => [
-			\Zend\Authentication\AuthenticationService::class => 'Acl\AuthService',
+			\Zend\Authentication\AuthenticationService::class => \Acl\Service\AuthService::class,
 		],
 	],
 	'settings' => [
@@ -128,7 +144,7 @@ return [
 						'options' => [
 							'route' => '/generatebcrypt',
 							'defaults' => [
-								'action' => 'generatebcrypt',
+								'action' => 'generateBcrypt',
 							],
 						],
 					],
@@ -184,6 +200,15 @@ return [
 							'route' => '/vismabruker',
 							'defaults' => [
 								'action' => 'createSoapUser',
+							]
+						]
+					],
+					'createElfagUser' => [
+						'type' => 'literal',
+						'options' => [
+							'route' => '/elfagbruker',
+							'defaults' => [
+								'action' => 'createUser',
 							]
 						]
 					],

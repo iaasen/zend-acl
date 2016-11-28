@@ -1,16 +1,18 @@
 <?php
 
-namespace Acl\Model;
+namespace Acl\Service;
 
+use Acl\Service\DbTable;
+use Acl\Model\Group;
 use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\Sql\Select;
 
 class GroupTable extends DbTable {
-	protected $tableGateway;
+	protected $primaryGateway;
 
 	public function __construct(TableGateway $tableGateway) {
-		$this->tableGateway = $tableGateway;
+		$this->primaryGateway = $tableGateway;
 	}
 
 	public function find($id) {
@@ -29,7 +31,7 @@ class GroupTable extends DbTable {
 		$currentUser = $this->getAuthService()->getIdentity();
 		// Setup SQL statement
 		$select = new \Zend\Db\Sql\Select();
-		$select->from($this->tableGateway->table); // groups
+		$select->from($this->primaryGateway->table); // groups
 		$select->join('users_has_groups', 'users_has_groups.groups_id = groups.id', array());
 		$select->join('users', 'users.id = users_has_groups.users_id', array());
 		$select->group('groups.id');
@@ -44,7 +46,7 @@ class GroupTable extends DbTable {
 //  		$statement = $sql->prepareStatementForSqlObject($select);
 //  		$results = $statement->execute();
 		
-		$results = $this->tableGateway->selectWith($select);
+		$results = $this->primaryGateway->selectWith($select);
 		//~r($results->current());
 		$groups = array ();
 		foreach($results as $elem) {
@@ -123,12 +125,12 @@ class GroupTable extends DbTable {
 			
 			$id = (int) $model->id;
 			if ($id == 0) {
-				$this->tableGateway->insert($data);
-				$id = (int) $this->tableGateway->getLastInsertValue();
+				$this->primaryGateway->insert($data);
+				$id = (int) $this->primaryGateway->getLastInsertValue();
 			}
 			else {
 				if ($this->find($id)) {
-					$this->tableGateway->update($data, array (
+					$this->primaryGateway->update($data, array (
 						'id' => $id 
 					));
 				}

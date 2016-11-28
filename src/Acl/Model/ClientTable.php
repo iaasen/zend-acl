@@ -2,20 +2,21 @@
 
 namespace Acl\Model;
 
+use Acl\Service\DbTable;
 use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Sql\Select;
-use General\Message;
+use Oppned\Message;
 
 class ClientTable extends DbTable {
 	//protected $serviceLocator;
 	protected static $currentUser;
-	protected $tableGateway;
+	protected $primaryGateway;
 	protected $groupTable;
 
 	public function __construct(TableGateway $_tableGateway) {
-		$this->tableGateway = $_tableGateway;
+		$this->primaryGateway = $_tableGateway;
 	}
 
 // 	public function fetchAll() {
@@ -37,7 +38,7 @@ class ClientTable extends DbTable {
 		$groups = rtrim($groups, ', ');
 		
 		//$select = new Select();
-		$rowSet = $this->tableGateway->select(
+		$rowSet = $this->primaryGateway->select(
 			function(Select $select) use ($groups) {
 				$select->join('users_has_groups', 'users_has_groups.users_id = users.id');
 				$select->where("users_has_groups.groups_id IN($groups)");
@@ -105,12 +106,12 @@ class ClientTable extends DbTable {
 		
 		$id = (int) $client->id;
 		if ($id == 0) {
-			$this->tableGateway->insert($data);
-			$id = (int) $this->tableGateway->getLastInsertValue();
+			$this->primaryGateway->insert($data);
+			$id = (int) $this->primaryGateway->getLastInsertValue();
 		}
 		else {
 			if ($this->find($id)) {
-				$this->tableGateway->update($data, array (
+				$this->primaryGateway->update($data, array (
 					'id' => $id,
 				));
 			}

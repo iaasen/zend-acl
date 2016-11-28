@@ -1,5 +1,5 @@
 <?php
-namespace Acl\Model;
+namespace Acl\Service;
 
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\Sql\Select;
@@ -11,17 +11,18 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 abstract class DbTable implements ServiceLocatorAwareInterface
 {
-	protected $tableGateway;
+	/** @var TableGateway */
+	protected $primaryGateway;
 	protected $serviceLocator;
 	
-	public function __construct(TableGateway $tableGateway)
+	public function __construct(TableGateway $primaryGateway)
 	{
-		$this->tableGateway = $tableGateway;
+		$this->primaryGateway = $primaryGateway;
 	}
 	
 	protected function fetchAll($where = null, $order = array())
 	{
-		$rowSet = $this->tableGateway->select(
+		$rowSet = $this->primaryGateway->select(
 				function(Select $select) use ($where, $order) {
 					$select->where($where);
 					$select->order($order);
@@ -39,7 +40,7 @@ abstract class DbTable implements ServiceLocatorAwareInterface
 	protected function find($id)
 	{
 		$id  = (int) $id;
-		$rowset = $this->tableGateway->select(array('id' => $id));
+		$rowset = $this->primaryGateway->select(array('id' => $id));
 		$row = $rowset->current();
 		if (!$row) {
 			throw new \Exception("Could not find row $id");
@@ -55,11 +56,11 @@ abstract class DbTable implements ServiceLocatorAwareInterface
 		
 		$id = (int)$model->id;
 		if ($id == 0) {
-			$this->tableGateway->insert($data);
-			$id = $this->tableGateway->getLastInsertValue();
+			$this->primaryGateway->insert($data);
+			$id = $this->primaryGateway->getLastInsertValue();
 		} else {
 			if ($this->find($id)) {
-				$this->tableGateway->update($data, array('id' => $id));
+				$this->primaryGateway->update($data, array('id' => $id));
 			} else {
 				throw new \Exception('Form id does not exist');
 			}
@@ -72,13 +73,13 @@ abstract class DbTable implements ServiceLocatorAwareInterface
 		if(is_object($id)) {
 			$id = $id->id;
 		}
-		$result = $this->tableGateway->delete(array('id' => $id));
+		$result = $this->primaryGateway->delete(array('id' => $id));
 		return (bool) $result;
 	}
 	
 	protected function query($select, $outputSqlString = false) {
-		if($outputSqlString) echo $select->getSqlString($this->tableGateway->getAdapter()->getPlatform());
-		$sql = new Sql($this->tableGateway->getAdapter());
+		if($outputSqlString) echo $select->getSqlString($this->primaryGateway->getAdapter()->getPlatform());
+		$sql = new Sql($this->primaryGateway->getAdapter());
 		$statement = $sql->prepareStatementForSqlObject($select);
 		return $statement->execute();
 	}

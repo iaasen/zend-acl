@@ -1,34 +1,48 @@
 <?php
 namespace Acl\Controller;
 
+use Zend\Http\PhpEnvironment\Request;
+use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use Zend\Form\Form;
-use Zend\Form\Fieldset;
-use Zend\Form\Element;
-use General\Message;
-use Acl\Model\User;
 use Zend\Crypt\Password\Bcrypt;
 
 class AuthController extends AbstractActionController {
 	protected $form;
 	protected $storage;
+
+	/** @var  \Acl\Service\AuthService */
 	protected $authService;
-	protected $tables;
+	/** @var  \Acl\Form\LoginForm */
+	protected $loginForm;
+	/** @var  \Acl\Service\UserTable */
+	protected $userTable;
+	/** @var  \Acl\Model\AclStorage */
+	protected $sessionStorage;
 	
-	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-		//$o = $this->getServiceLocator()->get('viewhelpermanager')->get('menu')->mainMenu();
-		return parent::onDispatch($e);
+	protected $tables;
+
+	public function __construct($authService, $loginForm, $userTable, $sessionStorage)
+	{
+		$this->authService = $authService;
+		$this->loginForm = $loginForm;
+		$this->userTable = $userTable;
+		$this->sessionStorage = $sessionStorage;
 	}
+
+//	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
+//		//$o = $this->getServiceLocator()->get('viewhelpermanager')->get('menu')->mainMenu();
+//		return parent::onDispatch($e);
+//	}
 	
 	
 	public function loginAction() {
 		if(isset($_GET['redirect'])) $redirect = $_GET['redirect'];
-		if($this->getAuthService()->hasIdentity()) {
+		if($this->authService->hasIdentity()) {
 			return $this->redirect()->toRoute('home');
 		}
 		
-		$_form = $this->getForm();
+		$_form = $this->loginForm;
 		$_form->setAttribute('action', $this->url()->fromRoute('auth/authenticate'));
 		if(isset($redirect)) $_form->get('redirect')->setValue($redirect);
 
@@ -45,71 +59,82 @@ class AuthController extends AbstractActionController {
 	}
 	
 	public function authenticateAction() {
-		$_form = $this->getForm();
-		$_redirect = 'auth/login';
-		
-		$_request = $this->getRequest();
-		if($_request->isPost()) {
-			$_form->setData($_request->getPost());
-			if($_form->isValid()) {
-				$authService = $this->getAuthService();
-				$authService->setIdentity($_request->getPost('username'));
-				$authService->setCredential($_request->getPost('password'));
+		$form = $this->loginForm;
+		$redirect = $this->params()->fromPost('redirect');
+		if(!$redirect) $redirect = $this->url()->fromRoute('auth/login');
 
-				$_result = $authService->authenticate();
+		/** @var Request $request */
+		$request = $this->getRequest();
+		if($request->isPost()) {
+			$form->setData($request->getPost());
+			if($form->isValid()) {
+				$this->authService->setIdentity($request->getPost('username'));
+				$this->authService->setCredential($request->getPost('password'));
 
-				foreach($_result->getMessages() as $message) {
+				$result = $this->authService->authenticate();
+
+				foreach($result->getMessages() as $message) {
 					$this->flashmessenger()->addMessage($message);
 				}
 				
-				if($_result->isValid()) {
-					$_redirect = 'home';
+				if($result->isValid()) {
+					$redirect = $this->url()->fromRoute('home');
 					
-					if($_request->getPost('rememberMe') == 1) {
-						$this->getSessionStorage()->setRememberMe(1);
-						$this->getAuthService()->setStorage($this->getSessionStorage());
+					if($request->getPost('rememberMe') == 1) {
+						$this->sessionStorage->setRememberMe(1);
+						$this->authService->setStorage($this->sessionStorage);
 					}
 					
-					$user = $this->getTable('user')->getUser($this->getAuthService()->getIdentity());
-					
+					$user = $this->userTable->getUser($this->authService->getIdentity());
+
 					if(!$user) { // Probably elfag-user and it's the first login
-						return $this->redirect()->toRoute('createUser');
+						return $this->redirect()->toRoute('user/createElfagUser');
 					}
 					
 					
 					$user->last_login = time();
-					$this->getTable('user')->save($user);
-					
+					$this->userTable->save($user);
+
 					// Make sure current_group is set
-					if($user->current_group == null) {
-						if(count($user->access) > 1) return $this->redirect()->toRoute('user', array('action' => 'selectgroup'), array('query' => array('redirect' => $_POST['redirect'])));
+					if(!$user->current_group) {
+						if(count($user->access) > 1) {
+							return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
+						}
 						elseif(count($user->access) == 1) {
 							$user->current_group = key($user->access);
-							$this->getTable('user')->save($user);
+							$this->userTable->save($user);
 						}
 						else {
 							$this->redirect()->toRoute('user', array('action' => 'noaccess'));
 						}
 					}
-					if(!isset($user->access[$user->current_group])) return $this->redirect()->toRoute('user', array('action' => 'selectgroup'), array('query' => array('redirect' => $_POST['redirect'])));
-					
-					if(isset($_POST['redirect']) && strlen($_POST['redirect'])) {
-						return $this->redirect()->toUrl($_POST['redirect']);
+
+					// No access to the current current_group
+					if(!isset($user->access[$user->current_group])) {
+						return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
 					}
-					else {
-						return $this->redirect()->toRoute($_redirect);
+
+					// Dispatch the login_successful event. Redirect if receiving a Response
+					$results = $this->getEventManager()->trigger('login_successful', $this, ['identity' => $result->getIdentity()]);
+					foreach($results as $result) {
+						if($result instanceof Response) {
+							return $result;
+						}
 					}
+
+					return $this->redirect()->toUrl($redirect);
 				}
 			}
 		}
 		
-		return $this->redirect()->toRoute($_redirect);
+		return $this->redirect()->toRoute($redirect);
 	}
 	
-	public function generatebcryptAction() {
+	public function generateBcryptAction() {
 		$cost = $this->params()->fromPost('cost', 13);
-		$password = $this->params()->fromPost('password', null);
-		
+		//$password = $this->params()->fromPost('password', null);
+
+		/** @var Request $request */
 		$request = $this->getRequest();
 		if($request->isPost()) {
 			$post = $request->getPost();
@@ -120,12 +145,16 @@ class AuthController extends AbstractActionController {
 			$time = microtime(true) - $time;
 		}
 		
-		return array('hash' => $hash, 'time' => $time, 'cost' => $cost);
+		return [
+			'hash' => (isset($hash)) ? $hash : null,
+			'time' => (isset($time)) ? $time : null,
+			'cost' => $cost
+		];
 	}
 	
 	public function logoutAction() {
-		$this->getSessionStorage()->forgetMe();
-		$this->getAuthService()->clearIdentity();
+		$this->sessionStorage->forgetMe();
+		$this->authService->clearIdentity();
 		
 		$this->flashmessenger()->addMessage('Du er logget ut');
 		return $this->redirect()->toRoute('auth/login');
@@ -133,39 +162,6 @@ class AuthController extends AbstractActionController {
 	
 	public function createuserAction() {
 		
-	}
-	
-	public function getForm() {
-		if(!$this->form) {
-			$this->form = $this->getServiceLocator()->get('Acl\Form\LoginForm');
-		}
-	
-		return $this->form;
-	}
-	
-	public function getAuthService() {
-		if(!$this->authService) {
-			$this->authService = $this->getServiceLocator()->get('Acl\AuthService');
-		}
-		
-		return $this->authService;
-	}
-	
-	public function getSessionStorage() {
-		if(!$this->storage) {
-			$this->storage = $this->getServiceLocator()->get('Acl\Model\AclStorage');
-		}
-		
-		return $this->storage;
-	}
-	
-	public function getTable($table) {
-		if (!isset($this->tables[$table])) {
-			$sm = $this->getServiceLocator();
-			$table = ucfirst ($table);
-			$this->tables[$table] = $sm->get ($table . 'Table');
-		}
-		return $this->tables [$table];
 	}
 	
 }

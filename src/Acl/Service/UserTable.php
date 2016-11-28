@@ -1,7 +1,10 @@
 <?php
 
-namespace Acl\Model;
+namespace Acl\Service;
 
+use Acl\Service\DbTable;
+use Acl\Model\Group;
+use Acl\Model\User;
 use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\TableGateway\AbstractTableGateway;
@@ -9,13 +12,12 @@ use Zend\Db\Sql\Select;
 use Oppned\Message;
 
 class UserTable extends DbTable {
-	//protected $serviceLocator;
 	protected static $currentUser;
-	protected $tableGateway;
+
 	protected $groupTable;
 
-	public function __construct(TableGateway $_tableGateway) {
-		$this->tableGateway = $_tableGateway;
+	public function __construct(TableGateway $primaryGateway) {
+		parent::__construct($primaryGateway);
 	}
 
 // 	public function fetchAll() {
@@ -37,7 +39,7 @@ class UserTable extends DbTable {
 		$groups = rtrim($groups, ', ');
 		
 		//$select = new Select();
-		$rowSet = $this->tableGateway->select(
+		$rowSet = $this->primaryGateway->select(
 			function(Select $select) use ($groups) {
 				$select->join('users_has_groups', 'users_has_groups.users_id = users.id');
 				$select->where("users_has_groups.groups_id IN($groups)");
@@ -161,7 +163,7 @@ class UserTable extends DbTable {
  		));
 		//echo $select->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
 		
-		$sql = new Sql($this->tableGateway->getAdapter());
+		$sql = new Sql($this->primaryGateway->getAdapter());
 		$statement = $sql->prepareStatementForSqlObject($select);
 		$results = $statement->execute();
 		foreach($results AS $result) {
@@ -196,10 +198,10 @@ class UserTable extends DbTable {
 		$savedata = $user->databaseSaveArray();
 		unset($savedata['id']);
 		
-		$success = $this->tableGateway->insert($savedata);
+		$success = $this->primaryGateway->insert($savedata);
 		if(!$success) return false;
 		else {
-			$id = (int) $this->tableGateway->getLastInsertValue();
+			$id = (int) $this->primaryGateway->getLastInsertValue();
 			return $this->getUser($id); 
 		}
 	}
@@ -249,12 +251,12 @@ class UserTable extends DbTable {
 		$id = (int) $storedUser->id;
 		if ($id == 0) {
 			$data['created'] = date("Y-m-d H:i:s");
-			$this->tableGateway->insert($data);
-			$id = (int) $this->tableGateway->getLastInsertValue();
+			$this->primaryGateway->insert($data);
+			$id = (int) $this->primaryGateway->getLastInsertValue();
 		}
 		else {
 			if ($this->find($id)) {
-				$this->tableGateway->update($data, array (
+				$this->primaryGateway->update($data, array (
 					'id' => $id,
 				));
 			}
@@ -285,7 +287,7 @@ class UserTable extends DbTable {
 				'groups_id' => $group->id
 			));
 			//echo $insert->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
-			$sql = new Sql($this->tableGateway->getAdapter());
+			$sql = new Sql($this->primaryGateway->getAdapter());
 			$statement = $sql->prepareStatementForSqlObject($insert);
 			$temp = $statement->execute();
 			return true;
@@ -319,7 +321,7 @@ class UserTable extends DbTable {
 			$update->set(array('access_level' => $access));
 			//echo $update->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
 			
- 			$sql = new Sql($this->tableGateway->getAdapter());
+ 			$sql = new Sql($this->primaryGateway->getAdapter());
  			$statement = $sql->prepareStatementForSqlObject($update);
  			
  			$statement->execute();
@@ -332,7 +334,7 @@ class UserTable extends DbTable {
 		$currentUser = $this->getCurrentUser();
 		
 		if($object == 'user') {
-			if(count(array_intersect_key($user->access, $currentUser->access))) return true;
+			if(count(array_intersect_key($mixed->access, $currentUser->access))) return true;
 		}
 		elseif($object == 'group') {
 			if(isset($currentUser->access[$mixed])) return true;

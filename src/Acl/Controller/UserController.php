@@ -26,7 +26,7 @@ class UserController extends AbstractActionController {
 
 	/** @var  \Acl\Model\User */
 	protected $currentUser;
-	/** @var  \Acl\Model\GroupTable */
+	/** @var  \Acl\Service\GroupTable */
 	protected $groupTable;
 
 	public function __construct($currentUser, $groupTable)
@@ -236,7 +236,7 @@ class UserController extends AbstractActionController {
 		));
 	}
 
-	public function createuserAction() {
+	public function createUserAction() {
 		$id = (int) $this->params()->fromRoute('id', null);
 		if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
 		
@@ -311,7 +311,7 @@ class UserController extends AbstractActionController {
 		$user->username = preg_replace('/^elfag-/', '', $group->group, 1) . '-visma';
 		$user->password = substr(md5(rand()), 0, 16);
 		$user->name = 'Visma';
-		$user->current_group = $currentUser->current_group;
+		$user->current_group = $this->currentUser->current_group;
 		
 		if(!$this->getTable('user')->accessToCreateUser($group)) {
 			Message::create(3, 'You have no access to create user accounts for this group');
