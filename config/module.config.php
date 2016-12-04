@@ -225,34 +225,34 @@ return [
 			],
 		],
 	],
-	'navigation' => [
-		'default' => [
-			'settings' => [
-				'label' => 'Innstillinger',
-				'route' => 'user/list',
-				'pages' => [
-					'user' => [
-						'label' => 'Brukere',
-						'route' => 'user/list',
-						'pages' => [
-							'editaccess' => [
-								'label' => 'Tilgang',
-								'route' => 'user/editaccess',
-							],
-							'createSoapUser' => [
-								'label' => 'Opprett Vismabruker',
-								'route' => 'user/createSoapUser',
-							],
-							'selectGroup' => [
-								'label' => 'Velg firma',
-								'route' => 'user/selectGroup',
-							],
-						],
-					],
-				],
-			],
-		],
-	],
+//	'navigation' => [
+//		'default' => [
+//			'settings' => [
+//				'label' => 'Innstillinger',
+//				'route' => 'user/list',
+//				'pages' => [
+//					'user' => [
+//						'label' => 'Brukere',
+//						'route' => 'user/list',
+//						'pages' => [
+//							'editaccess' => [
+//								'label' => 'Tilgang',
+//								'route' => 'user/editaccess',
+//							],
+//							'createSoapUser' => [
+//								'label' => 'Opprett Vismabruker',
+//								'route' => 'user/createSoapUser',
+//							],
+//							'selectGroup' => [
+//								'label' => 'Velg firma',
+//								'route' => 'user/selectGroup',
+//							],
+//						],
+//					],
+//				],
+//			],
+//		],
+//	],
 	'translator' => [
 		'locale' => 'nb_NO',
 		'translation_file_patterns' => [
