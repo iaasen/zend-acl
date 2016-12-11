@@ -28,5 +28,11 @@ return [
 				],
 			],
 		],
+		'login' => [
+			'login' => [
+				'label' => 'Logg inn',
+				'route' => 'auth/login',
+			],
+		],
 	],
 ];

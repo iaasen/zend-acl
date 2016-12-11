@@ -41,7 +41,7 @@ class AuthController extends AbstractActionController {
 		if($this->authService->hasIdentity()) {
 			return $this->redirect()->toRoute('home');
 		}
-		
+
 		$_form = $this->loginForm;
 		$_form->setAttribute('action', $this->url()->fromRoute('auth/authenticate'));
 		if(isset($redirect)) $_form->get('redirect')->setValue($redirect);
@@ -50,12 +50,8 @@ class AuthController extends AbstractActionController {
 			'form'		=> $_form,
 			'messages'	=> $this->flashmessenger()->getMessages(),
 		]);
-		$viewModel->setTemplate('auth/login');
+		//$viewModel->setTemplate('auth/login');
 		return $viewModel;
-//		return array(
-//			'form'		=> $_form,
-//			'messages'	=> $this->flashmessenger()->getMessages(),
-//		);
 	}
 	
 	public function authenticateAction() {
