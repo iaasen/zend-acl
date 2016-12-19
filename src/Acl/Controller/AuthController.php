@@ -80,7 +80,7 @@ class AuthController extends AbstractActionController {
 						$this->sessionStorage->setRememberMe(1);
 						$this->authService->setStorage($this->sessionStorage);
 					}
-					
+
 					$user = $this->userTable->getUser($this->authService->getIdentity());
 
 					if(!$user) { // Probably elfag-user and it's the first login

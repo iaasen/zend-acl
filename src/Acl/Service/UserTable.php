@@ -2,21 +2,27 @@
 
 namespace Acl\Service;
 
-use Acl\Service\DbTable;
 use Acl\Model\Group;
 use Acl\Model\User;
 use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
-use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Sql\Select;
 use Oppned\Message;
 
 class UserTable extends DbTable {
+	/** @var  User */
 	protected static $currentUser;
+	/** @var  string */
+	protected static $currentIdentity;
 
+	/** @var  \Acl\Service\GroupTable */
 	protected $groupTable;
+	/** @var  \Acl\Service\AuthService */
+	protected $authService;
 
-	public function __construct(TableGateway $primaryGateway) {
+	public function __construct(TableGateway $primaryGateway, $groupTable, $authService) {
+		$this->groupTable = $groupTable;
+		$this->authService = $authService;
 		parent::__construct($primaryGateway);
 	}
 
@@ -66,42 +72,63 @@ class UserTable extends DbTable {
 	 * Get logged in user
 	 */
 	public function getCurrentUser() {
-		if(self::$currentUser == null) {
-			$identity = $this->getAuthService()->getIdentity();
-			if($identity) {
-				$user = $this->getUser($identity);
-				if(!$user) {
-					 $user = new User();
-					 $user->username = $identity;
-					 if(substr($identity, 0, 6) == 'elfag-') {
-					 	$user->logintype = 'elfag';
-					 	$user->updateAccess($identity, array('access_level' => 5));
-					 }
-				}
-				self::$currentUser = $user;
-			}
-			else self::$currentUser = null;
+		$identity = $this->authService->getIdentity();
+		if($identity == self::$currentIdentity) {
+			return self::$currentUser;
 		}
+
+		$user = $this->getUser($identity);
+		if(!$user) {
+			$user = new User();
+			$user->username = $identity;
+			if(substr($identity, 0, 6) == 'elfag-') {
+				$user->logintype = 'elfag';
+				$user->updateAccess($identity, array('access_level' => 5));
+			}
+		}
+		self::$currentUser = &$user;
+		self::$currentIdentity = &$identity;
+
 		return self::$currentUser;
+
+
+//
+//		if(self::$currentUser == null) {
+//			$identity = $this->authService->getIdentity();
+//			if($identity) {
+//				$user = $this->getUser($identity);
+//				if(!$user) {
+//					 $user = new User();
+//					 $user->username = $identity;
+//					 if(substr($identity, 0, 6) == 'elfag-') {
+//					 	$user->logintype = 'elfag';
+//					 	$user->updateAccess($identity, array('access_level' => 5));
+//					 }
+//				}
+//				self::$currentUser = $user;
+//			}
+//			else self::$currentUser = null;
+//		}
+//		return self::$currentUser;
 	}
 
 	/**
-	 * @param mixed $user
+	 * @param string $identity
 	 * @throws \Exception
-	 * @return User $user
+	 * @return User|false $user
 	 * 
 	 * Give username or id to retrieve user from database.
 	 */
-	public function getUser($user) {
-		if(!strlen($user)) {
+	public function getUser($identity) {
+		if(!strlen($identity)) {
 			return false;
 		}
-		elseif(is_int($user)) {
-			$rowSet = parent::find($user);
-			$user = $rowSet;
+		elseif(is_int($identity)) {
+			$rowSet = parent::find($identity);
+			$identity = $rowSet;
 		}
 		else {
-			$rowSet = $this->fetchAll(array('username' => $user));
+			$rowSet = $this->fetchAll(array('username' => $identity));
 			//r($rowSet);
 			if(count($rowSet) > 1)
 				throw new \Exception('Multiple users with same username. Something is wrong.');
@@ -111,12 +138,12 @@ class UserTable extends DbTable {
 				return false;
 			}
 				
-			$user = $rowSet[0];
+			$identity = $rowSet[0];
 		}
 		
-		$this->getUserAccess($user);
+		$this->getUserAccess($identity);
 		
-		return $user;
+		return $identity;
 	}
 	
 	public function getUserByEmail($email) {
@@ -173,12 +200,15 @@ class UserTable extends DbTable {
 	}
 
 	public function getUserId() {
-		$authService = $this->serviceLocator->get('AuthService');
-		$user = $this->getUser($authService->getIdentity());
+		$user = $this->getUser($this->authService->getIdentity());
 		
 		return $user->id;
 	}
-	
+
+	/**
+	 * @param User $user
+	 * @return User|false
+	 */
 	public function create($user) {
 		$access = false;
 		foreach($this->getCurrentUser()->access AS $current) {
@@ -205,7 +235,12 @@ class UserTable extends DbTable {
 			return $this->getUser($id); 
 		}
 	}
-	
+
+	/**
+	 * @param User $user
+	 * @return bool|int
+	 * @throws \Exception
+	 */
 	public function save($user) {
 		if($this->accessToSave($user) == false) return false;
 		
@@ -270,14 +305,13 @@ class UserTable extends DbTable {
 	public function addUserToGroup($user, $group) {
 		if($group instanceof Group) $group = $group->group;
 	
-		$currentUser = $this->getCurrentUser();
 		$user = $this->getUser($user->id);
 	
 		// User already member of the group
 		if(isset($user->access[$group])) return true;
 	
 	
-		$group = $this->getGroupTable()->getGroup($group);
+		$group = $this->groupTable->getGroup($group);
 		// Add user
 		if($group !== false) {
 			$insert = new \Zend\Db\Sql\Insert();
@@ -289,7 +323,7 @@ class UserTable extends DbTable {
 			//echo $insert->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
 			$sql = new Sql($this->primaryGateway->getAdapter());
 			$statement = $sql->prepareStatementForSqlObject($insert);
-			$temp = $statement->execute();
+			$statement->execute();
 			return true;
 	
 		}
@@ -309,7 +343,7 @@ class UserTable extends DbTable {
 		if(!$this->accessToSaveAccess($user, $group)) return false;
 		
 		$access = $user->getAccessLevel($group);
-		$groupid = $this->getGroupTable()->getGroupId($group); 
+		$groupid = $this->groupTable->getGroupId($group);
 		
 		if($this->find($user->id)) {
 			$update = new \Zend\Db\Sql\Update();
@@ -437,15 +471,18 @@ class UserTable extends DbTable {
 // 		return $row;
 // 	}
 
-	public function getAuthService() {
-		return $this->serviceLocator->get('AuthService');
-	}
+	/**
+	 * @return \Acl\Service\AuthService
+	 */
+//	public function getAuthService() {
+//		return $this->serviceLocator->get('AuthService');
+//	}
 	
-	public function getGroupTable() {
-		return $this->groupTable;
-	}
-	
-	public function setGroupTable($table) {
-		$this->groupTable = $table;
-	}
+//	public function getGroupTable() {
+//		return $this->groupTable;
+//	}
+//
+//	public function setGroupTable($table) {
+//		$this->groupTable = $table;
+//	}
 }
