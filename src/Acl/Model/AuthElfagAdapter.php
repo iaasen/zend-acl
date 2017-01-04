@@ -28,10 +28,13 @@ class AuthElfagAdapter extends AbstractAdapter {
 	 */
 	public function authenticate() {
 		$this->identity = strtolower($this->identity);
+		if($this->credential == 'bergen') $credential = 'Bergen';
+		else $credential = $this->credential;
+
 		$ch = curl_init($this->url);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, array('u' => $this->identity, 'm' => md5($this->identity . ':' . $this->credential)));
+		curl_setopt($ch, CURLOPT_POSTFIELDS, array('u' => $this->identity, 'm' => md5($this->identity . ':' . $credential)));
 		$response = strip_tags(curl_exec($ch));
 
 		$response = json_decode($response);
@@ -45,5 +48,6 @@ class AuthElfagAdapter extends AbstractAdapter {
 		}
 		return new Result(Result::FAILURE_UNCATEGORIZED, null, array("Unexpected error: " . $response->message));
 	}
+
 	
 }

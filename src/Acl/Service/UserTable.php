@@ -43,16 +43,22 @@ class UserTable extends DbTable {
 		$groups = $this->groupTable->getGroupIds();
 		$groups = implode(', ', $groups);
 		$groups = rtrim($groups, ', ');
-		
-		//$select = new Select();
-		$rowSet = $this->primaryGateway->select(
-			function(Select $select) use ($groups) {
-				$select->join('users_has_groups', 'users_has_groups.users_id = users.id');
-				$select->where("users_has_groups.groups_id IN($groups)");
-				$select->group('id');
-				//echo $select->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
-			}
-		);
+		$select = new Select();
+		$select
+			->from($this->primaryGateway->getTable())
+			->join('users_has_groups', 'users_has_groups.users_id = users.id')
+			->group('id')
+			->where->in("users_has_groups.groups_id", $groups);
+		$rowSet = $this->primaryGateway->selectWith($select);
+
+//		$rowSet = $this->primaryGateway->select(
+//			function(Select $select) use ($groups) {
+//				$select->join('users_has_groups', 'users_has_groups.users_id = users.id');
+//				$select->where("users_has_groups.groups_id IN($groups)");
+//				$select->group('id');
+//				//echo $select->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
+//			}
+//		);
 
 		$users = array();
 		for($i = 0; $i < $rowSet->count(); $i++) {
@@ -185,9 +191,9 @@ class UserTable extends DbTable {
 		$select->from('users');
 		$select->join('users_has_groups', 'users_has_groups.users_id = users.id');
 		$select->join('groups', 'groups.id = users_has_groups.groups_id');
- 		$select->where(array (
- 			'users.id' => $user->id
- 		));
+		$select->where(array (
+			'users.id' => $user->id
+		));
 		//echo $select->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
 		
 		$sql = new Sql($this->primaryGateway->getAdapter());
@@ -243,12 +249,12 @@ class UserTable extends DbTable {
 	 */
 	public function save($user) {
 		if($this->accessToSave($user) == false) return false;
+
 		
 		// Existing user
 		$data = $user->databaseSaveArray();
 		$currentUser = $this->getCurrentUser();
-		
-		
+
 		if($user->logintype == 'soap') {
 			$storedUser = $user;
 		}
@@ -259,11 +265,17 @@ class UserTable extends DbTable {
 			else { // New user
 				$storedUser = $user;
 			}
-			
+
 			$storedData = $storedUser->databaseSaveArray();
 			foreach($data AS $key => $value) {
 				if($value === $storedData[$key]) continue;
 				switch($key) {
+					case 'name':
+						$storedUser->name = $value;
+						break;
+					case 'email':
+						$storedUser->email = $value;
+						break;
 					case 'password':
 						if($currentUser->id == $user->id) {
 							$storedUser->password = $user->password;
@@ -355,10 +367,10 @@ class UserTable extends DbTable {
 			$update->set(array('access_level' => $access));
 			//echo $update->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
 			
- 			$sql = new Sql($this->primaryGateway->getAdapter());
- 			$statement = $sql->prepareStatementForSqlObject($update);
- 			
- 			$statement->execute();
+			$sql = new Sql($this->primaryGateway->getAdapter());
+			$statement = $sql->prepareStatementForSqlObject($update);
+
+			$statement->execute();
 			return true;
 		}
 		return false;

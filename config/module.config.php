@@ -208,7 +208,7 @@ return [
 						'options' => [
 							'route' => '/elfagbruker',
 							'defaults' => [
-								'action' => 'createUser',
+								'action' => 'createElfagUser',
 							]
 						]
 					],

@@ -2,7 +2,20 @@
 
 namespace Acl\Model;
 
-use Zend\Crypt\Password\Bcrypt;
+
+/**
+ * Class User
+ * @package Acl\Model
+ * @property int $id
+ * @property string $logintype
+ * @property string $username
+ * @property string $password
+ * @property string $name
+ * @property string $email
+ * @property string $email_confirmed
+ * @property bool $superuser
+ * @property string $current_group
+ */
 class User {
 	public static $access_level = array (
 		0 => 'None',

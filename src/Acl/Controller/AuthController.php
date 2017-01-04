@@ -59,6 +59,9 @@ class AuthController extends AbstractActionController {
 		$redirect = $this->params()->fromPost('redirect');
 		if(!$redirect) $redirect = $this->url()->fromRoute('auth/login');
 
+
+
+
 		/** @var Request $request */
 		$request = $this->getRequest();
 		if($request->isPost()) {
@@ -86,7 +89,7 @@ class AuthController extends AbstractActionController {
 					if(!$user) { // Probably elfag-user and it's the first login
 						return $this->redirect()->toRoute('user/createElfagUser');
 					}
-					
+
 					
 					$user->last_login = time();
 					$this->userTable->save($user);
@@ -101,7 +104,7 @@ class AuthController extends AbstractActionController {
 							$this->userTable->save($user);
 						}
 						else {
-							$this->redirect()->toRoute('user', array('action' => 'noaccess'));
+							$this->redirect()->toRoute('user/noAccess');
 						}
 					}
 
@@ -122,8 +125,7 @@ class AuthController extends AbstractActionController {
 				}
 			}
 		}
-		
-		return $this->redirect()->toRoute($redirect);
+		return $this->redirect()->toUrl($redirect);
 	}
 	
 	public function generateBcryptAction() {

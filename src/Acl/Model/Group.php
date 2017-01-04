@@ -2,6 +2,15 @@
 
 namespace Acl\Model;
 
+/**
+ * Class Group
+ * @package Acl\Model
+ * @property int $id
+ * @property string $group
+ * @property string $name
+ * @property string $onninen_customer_id
+ * @property string $elfag_membership_number
+ */
 class Group {
 	protected $data = array (
 		'id' => null,

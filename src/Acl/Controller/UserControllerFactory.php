@@ -17,10 +17,11 @@ class UserControllerFactory
 	 */
 	public function __invoke($serviceLocator)
 	{
-		$currentUser = $serviceLocator->getServiceLocator()->get(\Acl\Service\UserTable::class)->getCurrentUser();
+	    $userTable = $serviceLocator->getServiceLocator()->get(\Acl\Service\UserTable::class);
+		$currentUser = $userTable->getCurrentUser();
 		$groupTable = $serviceLocator->getServiceLocator()->get(\Acl\Service\GroupTable::class);
 
-		return new UserController($currentUser, $groupTable);
+		return new UserController($currentUser, $userTable, $groupTable);
 	}
 
 }

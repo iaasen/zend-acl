@@ -2,15 +2,16 @@
 
 namespace Acl\Controller;
 
+use Acl\Model\Group;
+use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Acl\Form\CreateUserForm;
 use Acl\Form\EditUserForm;
 use Acl\Form\EditSoapUserForm;
-use Acl\Form\EditTokenForm;
 use Acl\Model\User;
 use Zend\Crypt\Password\Bcrypt;
-use General\Message;
+use Oppned\Message;
 
 /**
  * UserController
@@ -26,23 +27,26 @@ class UserController extends AbstractActionController {
 
 	/** @var  \Acl\Model\User */
 	protected $currentUser;
+	/** @var  \Acl\Service\UserTable */
+	protected $userTable;
 	/** @var  \Acl\Service\GroupTable */
 	protected $groupTable;
 
-	public function __construct($currentUser, $groupTable)
+	public function __construct($currentUser, $userTable, $groupTable)
 	{
 		$this->currentUser = $currentUser;
+		$this->userTable = $userTable;
 		$this->groupTable = $groupTable;
 	}
 
-	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-		//$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
-		//MenuWidget::mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
-		return parent::onDispatch($e);
-	}
+//	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
+//		//$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
+//		//MenuWidget::mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
+//		return parent::onDispatch($e);
+//	}
 	
 	public function viewAction() {
-		$user = $this->currentUser;
+		//$user = $this->currentUser;
 	}
 	
 	public function listAction() {
@@ -51,7 +55,7 @@ class UserController extends AbstractActionController {
 		$user = $this->currentUser;
 		return new ViewModel(array(
 			'currentUser' => $user,
-			'users' => $this->getTable('user')->getUsers(),
+			'users' => $this->userTable->getUsers(),
 			'group' => $this->groupTable->getGroup($user->current_group),
 			
 		));
@@ -62,7 +66,7 @@ class UserController extends AbstractActionController {
 		$id = (int) $this->params()->fromRoute('id', null);
 		if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
 		
-		$user = $this->getTable('user')->getUser($id);
+		$user = $this->userTable->getUser($id);
 		$currentUser = $this->currentUser;
 		$group = $this->groupTable->getGroup($currentUser->current_group);
 		
@@ -124,7 +128,8 @@ class UserController extends AbstractActionController {
 				$form->get('access_level')->setAttribute('disabled', 'disabled');
 			}
 		}
-		
+
+		/** @var Request $request */
 		$request = $this->getRequest();
 		
 		if ($request->isPost()) {
@@ -132,7 +137,7 @@ class UserController extends AbstractActionController {
 			
 			if ($form->isValid()) {
 				$valid = true;
-				$formdata = $form->getData();
+				//$formdata = $form->getData();
 
 				// New password?
 				if(strlen($form->get('new_password')->getValue())) {
@@ -177,10 +182,10 @@ class UserController extends AbstractActionController {
 					$form->get('access_level')->getValue() != $user->getAccessLevel($group->group)
 				) {
 					$user->updateAccess($group, $form->get('access_level')->getValue());
-					$this->getTable('user')->saveUserAccess($user, $group);
+					$this->userTable->saveUserAccess($user, $group);
 				}
 				
-				$id = $this->getTable('user')->save($user);
+				$this->userTable->save($user);
 				
 				// Redirect to view
 				if($valid) return $this->redirect()->toRoute('user', array('action' => 'list'));
@@ -198,14 +203,15 @@ class UserController extends AbstractActionController {
 		if(!$groupName) $groupName = $this->currentUser->current_group;
 		if($groupName == null) $this->redirect()->toRoute('user', array('action' => 'list'));
 
+		/** @var Request $request */
 		$request = $this->getRequest();
 		if ($request->isPost()) {
 			$post = $request->getpost()->toArray();
 			foreach($post['users'] AS $key => $value) {
-				$user = $this->getTable('user')->getUser((int) $key);
+				$user = $this->userTable->getUser((int) $key);
 				if($user !== false) {
 					$user->updateAccess($groupName, $value);
-					$this->getTable('user')->saveUserAccess($user, $groupName);
+					$this->userTable->saveUserAccess($user, $groupName);
 				}
 			}
 			$this->redirect()->toRoute('user', array('action' => 'list'));
@@ -213,7 +219,7 @@ class UserController extends AbstractActionController {
 		
 		$group = $this->groupTable->getGroup($groupName);
 		
-		$users = $this->getTable('user')->getUsers();
+		$users = $this->userTable->getUsers();
 		// List only users with access to this group
 		$editusers = array();
 		foreach($users AS $user) {
@@ -224,7 +230,7 @@ class UserController extends AbstractActionController {
 		
 		$access = array();
 		foreach($editusers AS $user) {
-			$access[$user->id] = $this->getTable('user')->accessToSaveAccess($user, $group->group);
+			$access[$user->id] = $this->userTable->accessToSaveAccess($user, $group->group);
 		}
 		
 		//MenuWidget::settingsMenu('users');
@@ -236,14 +242,47 @@ class UserController extends AbstractActionController {
 		));
 	}
 
+	public function createElfagUserAction() {
+	    if($this->currentUser->logintype != 'elfag') {
+	        Message::create(3, 'Ikke elfagbruker, kan ikke opprette');
+	        $this->redirect()->toRoute('home');
+        }
+
+        $user = $this->currentUser;
+        // Create user
+        $user->name = 'Systembruker';
+        $userId = $this->userTable->save($user);
+        $user->id = $userId;
+
+        $groupName = $this->currentUser->username;
+
+        $group = $this->groupTable->getGroup($groupName);
+        if(!$group) {
+            $group = new Group();
+            $group->group = $groupName;
+            $groupId = $this->groupTable->save($group);
+            $group->id = $groupId;
+        }
+
+        // Add user to group
+        $this->userTable->addUserToGroup($user, $group);
+        // Add access
+        $user->updateAccess($group->group, array('access_level' => 5, 'onnshop' => 0));
+        $this->userTable->saveUserAccess($user, $group);
+
+
+
+        $this->redirect()->toRoute('createUser');
+
+    }
+
 	public function createUserAction() {
-		$id = (int) $this->params()->fromRoute('id', null);
-		if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
-		
-		$group = $this->groupTable->getGroup((int) $id);
-		$currentUser = $this->currentUser;
-		
-		if(!$this->getTable('user')->accessToCreateUser($group))
+        $id = $this->params()->fromRoute('id');
+        if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
+
+        $group = $this->groupTable->getGroup($id);
+
+		if(!$this->userTable->accessToCreateUser($group))
 			$this->redirect()->toRoute('user', array('action' => 'list'));
 		
 		$form = new CreateUserForm();
@@ -252,14 +291,14 @@ class UserController extends AbstractActionController {
 		// Disable unavailable access_levels
 		$newoptions = array();
 		foreach($form->get('access_level')->getValueOptions() AS $key => $value) {
-			if($key < $currentUser->access[$group->group]['access_level'])
+			if($key < $this->currentUser->access[$group->group]['access_level'])
 				$newoptions[] = array('value' => $key, 'label' => $value);
 			else
 				$newoptions[] = array('value' => $key, 'label' => $value, 'disabled' => 'disabled');
 		}
 		$form->get('access_level')->setValueOptions($newoptions);
 		
-		
+		/** @var Request $request */
 		$request = $this->getRequest();
 		if ($request->isPost()) {
 			$post = $request->getpost();
@@ -267,7 +306,7 @@ class UserController extends AbstractActionController {
 			
 			if($form->isValid()) {
 				$data = $form->getData();
-				$user = $this->getTable('user')->getUserByEmail($data['email']);
+				$user = $this->userTable->getUserByEmail($data['email']);
 				if($user !== false) {
 					// User already member of group
 					if(isset($user->access[$group->group])) {
@@ -280,13 +319,13 @@ class UserController extends AbstractActionController {
 				$user = new User();
 				$user->name = $data['name'];
 				$user->email = $data['email'];
-				$user = $this->getTable('user')->create($user);
+				$user = $this->userTable->create($user);
 				}
 				// Add user to gruop
-				$this->getTable('user')->addUserToGroup($user, $group);
+				$this->userTable->addUserToGroup($user, $group);
 				// Add access
 				$user->updateAccess($group->group, array('access_level' => $data['access_level'], 'onnshop' => $data['onnshop']));
-				$this->getTable('user')->saveUserAccess($user, $group);
+				$this->userTable->saveUserAccess($user, $group);
 				// Redirect to user list
 				return $this->redirect()->toRoute('user');
 			}
@@ -313,7 +352,7 @@ class UserController extends AbstractActionController {
 		$user->name = 'Visma';
 		$user->current_group = $this->currentUser->current_group;
 		
-		if(!$this->getTable('user')->accessToCreateUser($group)) {
+		if(!$this->userTable->accessToCreateUser($group)) {
 			Message::create(3, 'You have no access to create user accounts for this group');
 			$this->redirect()->toRoute('user', array('action' => 'list'));
 		}
@@ -321,7 +360,8 @@ class UserController extends AbstractActionController {
 		$form = new EditSoapUserForm($user);
 		$form->bind($user);
 		$form->setData(array('new_password' => $user->password, 'access_level' => 1));
-		
+
+		/** @var Request $request */
 		$request = $this->getRequest();
 		if ($request->isPost()) {
 			$form->setData($request->getPost());
@@ -333,7 +373,7 @@ class UserController extends AbstractActionController {
 				$user->logintype = 'soap';
 				$user->current_group = $group->group;
 				
-				$uniqueUsername = $this->getTable('user')->getUniqueUsername($user->username);
+				$uniqueUsername = $this->userTable->getUniqueUsername($user->username);
 				if($uniqueUsername != $user->username) {
 					$messages = $form->get('username')->getMessages();
 					$messages[] = sprintf(_('The username \'%s\' is not available. Suggesting a different username'), $user->username);
@@ -346,10 +386,10 @@ class UserController extends AbstractActionController {
 					$bcrypt->setCost(13);
 					$user->password = $bcrypt->create($form->get('new_password')->getValue());
 					$user->updateAccess($group, $form->get('access_level')->getValue());
-					$userid = $this->getTable('user')->save($user);
-					$user->id = $userid;
-					$this->getTable('user')->addUserToGroup($user, $group);
-					$user = $this->getTable('user')->saveUserAccess($user, $group);
+					$userId = $this->userTable->save($user);
+					$user->id = $userId;
+					$this->userTable->addUserToGroup($user, $group);
+					$this->userTable->saveUserAccess($user, $group);
 					// Redirect to user list
 					return $this->redirect()->toRoute('user');
 				}
@@ -374,18 +414,19 @@ class UserController extends AbstractActionController {
 		// Only one group available
 		if(count($groups) == 1) {
 			$user->current_group = $groups[0]->group;
-			$ok = $this->getTable('user')->save($user);
+			$this->userTable->save($user);
 			if(strlen($redirect)) return $this->redirect()->toUrl($redirect);
 			else return $this->redirect()->toRoute('home');
 		}
-		
+
+		/** @var Request $request */
 		$request = $this->getRequest();
 		if($request->isPost()) {
 			$post = $request->getPost();
 			
 			if(isset($post['group']) && isset($user->access[$post['group']])) {
 				$user->current_group = $post['group'];
-				$this->getTable('user')->save($user);
+				$this->userTable->save($user);
 			}
 			
 			if(strlen($redirect)) return $this->redirect()->toUrl($redirect);
