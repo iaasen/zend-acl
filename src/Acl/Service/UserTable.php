@@ -41,8 +41,6 @@ class UserTable extends DbTable {
 	 */
 	public function getUsers() {
 		$groups = $this->groupTable->getGroupIds();
-		$groups = implode(', ', $groups);
-		$groups = rtrim($groups, ', ');
 		$select = new Select();
 		$select
 			->from($this->primaryGateway->getTable())
