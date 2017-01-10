@@ -1,8 +1,13 @@
-<?php 
-$access = $this->access;
+<?php
+/**
+ * @var \Acl\Model\Group $group
+ * @var \Acl\Model\User $currentUser
+ * @var \Acl\Model\User[] $users
+ * @var array $access
+ */
 
-$menuContainer = $this->navigation('navigation')->getContainer();
-$menuContainer->findOneBy('route', 'user/editaccess')->setActive();
+//$menuContainer = $this->navigation('navigation')->getContainer();
+//$menuContainer->findOneBy('route', 'user/editaccess')->setActive();
 
 
 ?>
