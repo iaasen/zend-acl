@@ -31,7 +31,9 @@ class UserTableFactory
 		$groupTable = $serviceManager->get(\Acl\Service\GroupTable::class);
 		$authService = $serviceManager->get(\Acl\Service\AuthService::class);
 
-		return new UserTable($primaryGateway, $groupTable, $authService);
+		$request = $serviceManager->get('Request');
+
+		return new UserTable($primaryGateway, $groupTable, $authService, $request);
 	}
 
 }

@@ -26,6 +26,7 @@ class User {
 		5 => 'Master' 
 	);
 	public static $login_types = array(
+		'console' => 'Console',
 		'default' => 'Local',
 		'elfag' => 'elfag.no',
 		'soap' => 'Visma',
@@ -89,6 +90,9 @@ class User {
 	}
 	
 	public function getAccessLevel($group = null) {
+		// Console
+		if($this->logintype == 'console') return 6;
+
 		if(!$group) $group = $this->current_group;
 		if(isset($this->access[$group]) && isset($this->access[$group]['access_level'])) {
 			return $this->access[$group]['access_level'];

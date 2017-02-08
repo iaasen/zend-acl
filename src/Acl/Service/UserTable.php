@@ -8,6 +8,7 @@ use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\Sql\Select;
 use Oppned\Message;
+use Zend\Stdlib\RequestInterface;
 
 class UserTable extends DbTable {
 	/** @var  User */
@@ -19,10 +20,13 @@ class UserTable extends DbTable {
 	protected $groupTable;
 	/** @var  \Acl\Service\AuthService */
 	protected $authService;
+	/** @var  RequestInterface */
+	protected $request;
 
-	public function __construct(TableGateway $primaryGateway, $groupTable, $authService) {
+	public function __construct(TableGateway $primaryGateway, $groupTable, $authService, $request) {
 		$this->groupTable = $groupTable;
 		$this->authService = $authService;
+		$this->request = $request;
 		parent::__construct($primaryGateway);
 	}
 
@@ -78,6 +82,16 @@ class UserTable extends DbTable {
 	 * Get logged in user
 	 */
 	public function getCurrentUser() {
+		// Console user
+		if($this->request instanceof \Zend\Console\Request) {
+			$user = new User();
+			$user->username = 'console';
+			$user->logintype = 'console';
+			self::$currentUser = &$user;
+			self::$currentIdentity = 'console';
+			return self::$currentUser;
+		}
+
 		$identity = $this->authService->getIdentity();
 		if($identity == self::$currentIdentity) {
 			return self::$currentUser;
