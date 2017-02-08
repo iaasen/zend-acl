@@ -11,9 +11,9 @@ return [
 						'label' => 'Brukere',
 						'route' => 'user/list',
 						'pages' => [
-							'editaccess' => [
+							'editAccess' => [
 								'label' => 'Tilgang',
-								'route' => 'user/editaccess',
+								'route' => 'user/editAccess',
 							],
 							'createSoapUser' => [
 								'label' => 'Opprett Vismabruker',

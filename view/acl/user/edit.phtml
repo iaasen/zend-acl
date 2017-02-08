@@ -8,8 +8,10 @@ $this->headTitle($title);
 $form = $this->makeFormHorizontal($form);
 $this->form($form, \TwbBundle\Form\View\Helper\TwbBundleForm::LAYOUT_HORIZONTAL);
 
-$menuContainer = $this->navigation('navigation')->getContainer();
-$menuContainer->findOneBy('route', 'user/editaccess')->setActive();
+//$menuContainer = $this->navigation('navigation')->getContainer();
+//$page = $menuContainer->findOneBy('route', 'user/editAccess');
+//~r($page);
+//$page->setActive();
 
 ?>
 
