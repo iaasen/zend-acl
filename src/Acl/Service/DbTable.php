@@ -1,6 +1,7 @@
 <?php
 namespace Acl\Service;
 
+use Oppned\ModelInterface;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
@@ -47,7 +48,12 @@ abstract class DbTable implements ServiceLocatorAwareInterface
 		}
 		return $row;
 	}
-	
+
+	/**
+	 * @param ModelInterface $model
+	 * @return int
+	 * @throws \Exception
+	 */
 	protected function save($model) {
 		$data = $model->databaseSaveArray();
 		unset($data->id);
@@ -76,7 +82,12 @@ abstract class DbTable implements ServiceLocatorAwareInterface
 		$result = $this->primaryGateway->delete(array('id' => $id));
 		return (bool) $result;
 	}
-	
+
+	/**
+	 * @param Select $select
+	 * @param bool $outputSqlString
+	 * @return \Zend\Db\Adapter\Driver\ResultInterface
+	 */
 	protected function query($select, $outputSqlString = false) {
 		if($outputSqlString) echo $select->getSqlString($this->primaryGateway->getAdapter()->getPlatform());
 		$sql = new Sql($this->primaryGateway->getAdapter());
@@ -97,7 +108,10 @@ abstract class DbTable implements ServiceLocatorAwareInterface
 	public function setServiceLocator(ServiceLocatorInterface $serviceLocator) {
 		$this->serviceLocator = $serviceLocator;
 	}
-	
+
+	/**
+	 * @return ServiceLocatorInterface
+	 */
 	public function getServiceLocator() {
 		return $this->serviceLocator;
 	}

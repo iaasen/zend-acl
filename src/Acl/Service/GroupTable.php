@@ -2,18 +2,10 @@
 
 namespace Acl\Service;
 
-use Acl\Service\DbTable;
+use Acl\Model\User;
 use Acl\Model\Group;
-use Zend\Db\Sql\Sql;
-use Zend\Db\TableGateway\TableGateway;
-use Zend\Db\Sql\Select;
 
 class GroupTable extends DbTable {
-	protected $primaryGateway;
-
-	public function __construct(TableGateway $tableGateway) {
-		$this->primaryGateway = $tableGateway;
-	}
 
 	public function find($id) {
 		return $this->getGroup((int) $id);
@@ -24,7 +16,7 @@ class GroupTable extends DbTable {
 	/**
 	 * Get available groups to current user.
 	 * 
-	 * @return Group
+	 * @return Group[]
 	 */
 	public function getGroups($all = false) {
 		// Get Username
@@ -59,7 +51,8 @@ class GroupTable extends DbTable {
 	/**
 	 * 
 	 * @param mixed $id (int) Table id or (string) group name
-	 * @return mixed
+	 * @return Group|false
+	 * @throws \Exception
 	 */
 	public function getGroup($id) {
 		if(is_int($id)) {
@@ -74,8 +67,9 @@ class GroupTable extends DbTable {
 			$group = $rowSet[0];
 		}
 		$currentUser = $this->getCurrentUser();
-		if(isset($currentUser->access[$group->group]) || $currentUser->superuser)
-			return $group;
+		if($currentUser->getAccessLevel($group) > 5) return $group;
+//		if(isset($currentUser->access[$group->group]) || $currentUser->superuser)
+//			return $group;
 		else return false;
 	}
 	
@@ -83,6 +77,7 @@ class GroupTable extends DbTable {
 	/**
 	 * 
 	 * @param string $group
+	 * @return int|bool
 	 */
 	public function getGroupId($group) {
 		$group = $this->fetchAll(array('group' => $group));
@@ -114,7 +109,11 @@ class GroupTable extends DbTable {
 	}
 
 
-
+	/**
+	 * @param Group $model
+	 * @return false|int
+	 * @throws \Exception
+	 */
 	public function save($model) {
 		//$activeUser = $this->getAuthService()->getIdentity();
 		$activeUser = $this->getCurrentUser();
@@ -144,11 +143,18 @@ class GroupTable extends DbTable {
 			return false;
 	}
 
-
+	/**
+	 * @return AuthService
+	 */
 	public function getAuthService() {
-		return $this->serviceLocator->get('AuthService');
+		/** @var AuthService $authService */
+		$authService = $this->getServiceLocator()->get('AuthService');
+		return $authService;
 	}
-	
+
+	/**
+	 * @return User
+	 */
 	public function getCurrentUser() {
 		return $this->getServiceLocator()->get('UserTable')->getCurrentUser();
 	}
