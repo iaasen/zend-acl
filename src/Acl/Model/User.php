@@ -88,14 +88,22 @@ class User {
 		$this->access[$group] = $washed;
 		return $this;
 	}
-	
+
+	/**
+	 * @param Group|string $group
+	 * @return int
+	 */
 	public function getAccessLevel($group = null) {
 		// Console
 		if($this->logintype == 'console') return 6;
 
 		if(!$group) $group = $this->current_group;
-		if(isset($this->access[$group]) && isset($this->access[$group]['access_level'])) {
-			return $this->access[$group]['access_level'];
+
+		if(is_object($group)) $groupName = $group->group;
+		else $groupName = $group;
+
+		if(isset($this->access[$groupName]) && isset($this->access[$groupName]['access_level'])) {
+			return $this->access[$groupName]['access_level'];
 		}
 		return 0;
 	}

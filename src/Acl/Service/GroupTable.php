@@ -59,7 +59,7 @@ class GroupTable extends DbTable {
 			$group = parent::find($id);
 		}
 		else {
-			$rowSet = $this->fetchAll(array('group' => $id));
+			$rowSet = $this->fetchAll(['group' => $id]);
 			if(count($rowSet) > 1)
 				throw new \Exception('Multiple groups with same name. Something is wrong.');
 			if(count($rowSet) == 0)
@@ -67,7 +67,8 @@ class GroupTable extends DbTable {
 			$group = $rowSet[0];
 		}
 		$currentUser = $this->getCurrentUser();
-		if($currentUser->getAccessLevel($group) > 5) return $group;
+
+		if($currentUser->getAccessLevel($group) > 0) return $group;
 //		if(isset($currentUser->access[$group->group]) || $currentUser->superuser)
 //			return $group;
 		else return false;
