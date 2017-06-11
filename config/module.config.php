@@ -9,13 +9,16 @@ return [
 	'service_manager' => [
 		'invokables' => [
 			\Acl\Form\LoginForm::class => \Acl\Form\LoginForm::class,
+			\Acl\Model\Access::class => \Acl\Model\Access::class,
 			\Acl\Model\Group::class => \Acl\Model\Group::class,
 			\Acl\Model\User::class => \Acl\Model\User::class,
 		],
 		'factories' => [
 			\Acl\Model\AclStorage::class => \Acl\Model\AclStorageFactory::class,
+			\Acl\Service\AccessTable::class => \Acl\Service\AccessTableFactory::class,
 			\Acl\Service\AuthService::class => \Acl\Service\AuthServiceFactory::class,
 			\Acl\Service\GroupTable::class => \Acl\Service\GroupTableFactory::class,
+			\Acl\Service\UserService::class => \Acl\Service\UserServiceFactory::class,
 			\Acl\Service\UserTable::class => \Acl\Service\UserTableFactory::class,
 		],
 		'aliases' => [
@@ -40,6 +43,10 @@ return [
 	'view_helpers' => [
 		'aliases' => [
 			\Zend\Authentication\AuthenticationService::class => \Acl\Service\AuthService::class,
+			'groupselection' => \Acl\View\Helper\GroupSelectionWidget::class,
+		],
+		'factories' => [
+			\Acl\View\Helper\GroupSelectionWidget::class => \Acl\View\Helper\GroupSelectionWidgetFactory::class,
 		],
 	],
 	'settings' => [

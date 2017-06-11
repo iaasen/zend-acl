@@ -4,110 +4,116 @@ namespace Acl\Service;
 
 use Acl\Model\User;
 use Acl\Model\Group;
+use Oppned\AbstractTable;
+use Zend\Db\Sql\Select;
+use Zend\Db\TableGateway\TableGateway;
 
-class GroupTable extends DbTable {
+class GroupTable extends AbstractTable {
+	/** @var  \Acl\Service\AuthService */
+	protected $authService;
+
+//	public function __construct($currentUser, TableGateway $primaryGateway, $authService)
+//	{
+//		$this->authService = $authService;
+//		parent::__construct($currentUser, $primaryGateway);
+//	}
 
 	public function find($id) {
-		return $this->getGroup((int) $id);
+		return $this->getGroupById((int) $id);
 	}
-	
-	
-	
+
+
 	/**
 	 * Get available groups to current user.
-	 * 
+	 * @deprecated Use UserService::getGroupsByCurrentUser()
+	 * @param bool $all
 	 * @return Group[]
 	 */
 	public function getGroups($all = false) {
-		// Get Username
-		$currentUser = $this->getAuthService()->getIdentity();
-		// Setup SQL statement
-		$select = new \Zend\Db\Sql\Select();
-		$select->from($this->primaryGateway->table); // groups
-		$select->join('users_has_groups', 'users_has_groups.groups_id = groups.id', array());
-		$select->join('users', 'users.id = users_has_groups.users_id', array());
-		$select->group('groups.id');
-		
-		if(!$all) {
-			$select->where(array (
-				'users.username' => $currentUser 
-			));
-		}
-		//echo $select->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
-//  		$sql = new Sql($this->tableGateway->getAdapter());
-//  		$statement = $sql->prepareStatementForSqlObject($select);
-//  		$results = $statement->execute();
-		
-		$results = $this->primaryGateway->selectWith($select);
-		//~r($results->current());
-		$groups = array ();
-		foreach($results as $elem) {
-			$groups[] = $elem;
-		}
-		//~r($groups);
-		return $groups;
+		throw new \DomainException('Method is deprecated. Use UserService::getGroupsByCurrentUser()');
+	}
+
+	/**
+	 * @param int $id
+	 * @return Group|false
+	 */
+	public function getGroupById($id) {
+		return parent::find($id);
+	}
+
+	/**
+	 * @param string $name
+	 * @return Group|false
+	 * @throws \Exception
+	 */
+	public function getGroupByName($name) {
+		$rowSet = $this->fetchAll(['group' => $name]);
+		if(count($rowSet) > 1)
+			throw new \Exception('Multiple groups with same name. Something is wrong.');
+		if(count($rowSet) == 0)
+			return false;
+		return $rowSet[0];
 	}
 	
 	/**
 	 * 
 	 * @param mixed $id (int) Table id or (string) group name
-	 * @return Group|false
-	 * @throws \Exception
+	 * @deprecated Use getGroupById() or getGroupByName()
 	 */
 	public function getGroup($id) {
-		if(is_int($id)) {
-			$group = parent::find($id);
-		}
-		else {
-			$rowSet = $this->fetchAll(['group' => $id]);
-			if(count($rowSet) > 1)
-				throw new \Exception('Multiple groups with same name. Something is wrong.');
-			if(count($rowSet) == 0)
-				return false;
-			$group = $rowSet[0];
-		}
-		$currentUser = $this->getCurrentUser();
-
-		if($currentUser->getAccessLevel($group) > 0) return $group;
-//		if(isset($currentUser->access[$group->group]) || $currentUser->superuser)
-//			return $group;
-		else return false;
+		throw new \DomainException('Method is deprecated. Use getGroupById() or getGroupByName()');
 	}
-	
-	
+
+
 	/**
-	 * 
-	 * @param string $group
-	 * @return int|bool
+	 *
+	 * @param string $name
+	 * @return false|int
 	 */
-	public function getGroupId($group) {
-		$group = $this->fetchAll(array('group' => $group));
-		if($group) return $group[0]->id;
+	public function getGroupId($name) {
+		$group = $this->getGroupByName($name);
+		if($group) return $group->id;
 		else return false;
 	}
-	
-
 
 	public function getGroupsArray() {
-		$data = $this->getGroups();
-		
-		$groups = array ();
-		foreach($data as $elem) {
-			$groups[$elem['id']] = $elem['group'];
-		}
-		
-		return $groups;
+		throw new \DomainException('Method is deprecated.');
 	}
 
-	public function getGroupIds() {
-		$groups = $this->getGroups();
-		$group_ids = array ();
-		foreach($groups as $group) {
-			array_push($group_ids, $group->id);
-		}
-		
-		return $group_ids;
+	public function getGroupsByUserId($id) {
+		// Setup SQL statement
+		$select = new Select();
+		$select->from($this->primaryGateway->table); // groups
+		$select->join('users_has_groups', 'users_has_groups.groups_id = groups.id', []);
+		$select->group('groups.id');
+		$select->where->equalTo('users_has_groups.user_id', $id);
+		$results = $this->primaryGateway->selectWith($select);
+
+		return $this->convertRowSetToArray($results);
 	}
+
+	/**
+	 * @deprecated Use AccessTable::getAccessesByUserId()
+	 */
+	public function getAccessByUserId($id) {
+		throw new \DomainException('Method is deprecated. Use AccessTable::getAccessesByUserId()');
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public function getGroupIds() {
+		throw new \DomainException('Method is deprecated.');
+	}
+
+	/**
+	 * Get all users the current user has admin rights to
+	 * @deprecated
+	 */
+	public function getUsersByGroup($group = null) {
+		throw new \DomainException('Method is deprecated.');
+	}
+
 
 
 	/**
@@ -116,10 +122,7 @@ class GroupTable extends DbTable {
 	 * @throws \Exception
 	 */
 	public function save($model) {
-		//$activeUser = $this->getAuthService()->getIdentity();
-		$activeUser = $this->getCurrentUser();
-		
-		if (isset($activeUser->access[$model->group])) {
+		if (isset($this->currentUser->access[$model->group])) {
 			$data = $model->databaseSaveArray();
 			unset($data->id);
 			
@@ -143,21 +146,4 @@ class GroupTable extends DbTable {
 		else
 			return false;
 	}
-
-	/**
-	 * @return AuthService
-	 */
-	public function getAuthService() {
-		/** @var AuthService $authService */
-		$authService = $this->getServiceLocator()->get('AuthService');
-		return $authService;
-	}
-
-	/**
-	 * @return User
-	 */
-	public function getCurrentUser() {
-		return $this->getServiceLocator()->get('UserTable')->getCurrentUser();
-	}
-	
 }

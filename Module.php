@@ -30,9 +30,6 @@ use Acl\Model\AuthElfagAdapter;
 class Module implements AutoloaderProviderInterface {
 	public function getAutoloaderConfig() {
 		return array(
-			'Zend\Loader\ClassMapAutoloader' => array(
-				__DIR__ . '/autoload_classmap.php',
-			),
 			'Zend\Loader\StandardAutoloader' => array(
 				'namespaces' => array(
 					__NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
@@ -73,8 +70,7 @@ class Module implements AutoloaderProviderInterface {
 			
 			$match = $e->getRouteMatch();
 			$redirect = $_SERVER['REQUEST_URI'];
-			
-			
+
 			if(!$match instanceof RouteMatch) {
 				return;
 			}
@@ -87,20 +83,19 @@ class Module implements AutoloaderProviderInterface {
 				});
 				return;
 			}
-			
 			$name = $match->getMatchedRouteName();
 			$action = $match->getParam('action');
-			$searchname = $name . '/' . $action;
-			//~r($searchname);	
-			if(in_array($name, $list) || in_array($searchname, $list)) {
+			$searchName = $name . '/' . $action;
+			//~r($searchname);
+			if(in_array($name, $list) || in_array($searchName, $list)) {
 				return;
 			}
-			
+
 			$router = $e->getRouter();
 			$url = $router->assemble(array(), array(
 				'name'	=>	'auth/login',
 			));
-				
+
 			$response = $e->getResponse();
 			//$response->getHeaders()->addHeaderLine('Location', $url);
 			$response->getHeaders()->addHeaderLine('Location', $url . '?redirect=' . $redirect);
@@ -122,17 +117,17 @@ class Module implements AutoloaderProviderInterface {
 		return include __DIR__ . '/config/module.config.php';
 	}
 	
-	public function getViewHelperConfig() {
-		return array(
-			'factories' => array(
-				'groupselection' => function ($sm) {
-					$locator = $sm->getServiceLocator();
-					$helper = new GroupselectionWidget();
-					return $helper;
-				}
-			)
-		);
-	}
+//	public function getViewHelperConfig() {
+//		return array(
+//			'factories' => array(
+//				'groupselection' => function ($sm) {
+//					$locator = $sm->getServiceLocator();
+//					$helper = new GroupselectionWidget();
+//					return $helper;
+//				}
+//			)
+//		);
+//	}
 	
 	
 	

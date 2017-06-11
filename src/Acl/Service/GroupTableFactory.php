@@ -24,6 +24,9 @@ class GroupTableFactory
 		$resultSetPrototype = new ResultSet();
 		$resultSetPrototype->setArrayObjectPrototype($serviceManager->get(\Acl\Model\Group::class));
 		$primaryGateway = new TableGateway('groups', $dbAdapter, null, $resultSetPrototype);
-		return new GroupTable($primaryGateway);
+		$authService = $serviceManager->get(\Acl\Service\AuthService::class);
+		//$userTable = $serviceManager->get(\Acl\Service\UserTable::class);
+		//$currentUser = $userTable->getCurrentUser;
+		return new GroupTable(null, $primaryGateway, ['authService' => $authService]);
 	}
 }

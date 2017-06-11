@@ -28,12 +28,12 @@ class UserTableFactory
 		//$primaryGateway = new TableGateway('users', $dbAdapter, new RowGatewayFeature('id'), $resultSetPrototype);
 		$primaryGateway = new TableGateway('users', $dbAdapter, null, $resultSetPrototype);
 
-		$groupTable = $serviceManager->get(\Acl\Service\GroupTable::class);
+		//$groupTable = $serviceManager->get(\Acl\Service\GroupTable::class);
 		$authService = $serviceManager->get(\Acl\Service\AuthService::class);
 
-		$request = $serviceManager->get('Request');
+		//$request = $serviceManager->get('Request');
 
-		return new UserTable($primaryGateway, $groupTable, $authService, $request);
+		return new UserTable(null, $primaryGateway, $authService);
 	}
 
 }

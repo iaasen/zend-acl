@@ -17,14 +17,14 @@ namespace Acl\Model;
  * @property string $current_group
  */
 class User {
-	public static $access_level = array (
-		0 => 'None',
-		1 => 'View',
-		2 => 'Edit own', // Create and edit own
-		3 => 'Edit all', // Edit others
-		4 => 'Admin',
-		5 => 'Master' 
-	);
+//	public static $access_level = array (
+//		0 => 'None',
+//		1 => 'View',
+//		2 => 'Edit own', // Create and edit own
+//		3 => 'Edit all', // Edit others
+//		4 => 'Admin',
+//		5 => 'Master'
+//	);
 	public static $login_types = array(
 		'console' => 'Console',
 		'default' => 'Local',
@@ -59,34 +59,11 @@ class User {
 		_('Local');
 		_('Application/Website');
 	}
-	
+
+
 	public function updateAccess($group, $access) {
 		if($group instanceof Group) $group = $group->group;
-		if(!is_array($access)) {
-			$access = array('access_level' => $access);
-		}
-// 		if($this->username == 'trond')
-// 			r($group, $access);
-		
-		$washed = array (
-			'access_level' => 0,
-			'onnshop' => false 
-		);
-		
-		foreach($access as $key => $value) {
-			if (array_key_exists($key, $washed)) {
-				switch ($key) {
-					case 'access_level' :
-						$washed[$key] = (int) $value;
-						break;
-					default :
-						$washed[$key] = ( bool ) $value;
-						break;
-				}
-			}
-		}
-		$this->access[$group] = $washed;
-		return $this;
+		$this->access[$group] = $access;
 	}
 
 	/**
@@ -102,8 +79,8 @@ class User {
 		if(is_object($group)) $groupName = $group->group;
 		else $groupName = $group;
 
-		if(isset($this->access[$groupName]) && isset($this->access[$groupName]['access_level'])) {
-			return $this->access[$groupName]['access_level'];
+		if(isset($this->access[$groupName]) && isset($this->access[$groupName]->access_level)) {
+			return $this->access[$groupName]->access_level;
 		}
 		return 0;
 	}

@@ -4,132 +4,59 @@ namespace Acl\Service;
 
 use Acl\Model\Group;
 use Acl\Model\User;
+use Oppned\AbstractTable;
 use Zend\Db\Sql\Sql;
+use Zend\Db\Sql\Where;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\Sql\Select;
 use Oppned\Message;
 use Zend\Stdlib\RequestInterface;
 
-class UserTable extends DbTable {
-	/** @var  User */
-	protected static $currentUser;
-	/** @var  string */
-	protected static $currentIdentity;
+class UserTable extends AbstractTable {
+//	/** @var  User */
+//	protected static $currentUser;
+//	/** @var  string */
+//	protected static $currentIdentity;
 
-	/** @var  \Acl\Service\GroupTable */
-	protected $groupTable;
+//	/** @var  \Acl\Service\GroupTable */
+//	protected $groupTable;
 	/** @var  \Acl\Service\AuthService */
 	protected $authService;
-	/** @var  RequestInterface */
-	protected $request;
+//	/** @var  RequestInterface */
+//	protected $request;
 
-	public function __construct(TableGateway $primaryGateway, $groupTable, $authService, $request) {
-		$this->groupTable = $groupTable;
+	public function __construct($currentUser, TableGateway $primaryGateway, $authService) {
+		//$this->groupTable = $groupTable;
 		$this->authService = $authService;
-		$this->request = $request;
-		parent::__construct($primaryGateway);
+		//$this->request = $request;
+		parent::__construct($currentUser, $primaryGateway);
 	}
-
-// 	public function fetchAll() {
-// 		$resultSet = $this->tableGateway->select();
-// 		return $resultSet;
-// 	}
 
 	public function find($id) {
 		return $this->getUser((int) $id);
 	}
-	
-	
+
 	/**
 	 * Get all users the current user has admin rights to
+	 * @deprecated Use UserService::getUsersByCurrentGroup()
 	 */
 	public function getUsers() {
-		$groups = $this->groupTable->getGroupIds();
-		//$groups = implode(', ', $groups);
-		//$groups = rtrim($groups, ', ');
-		$select = new Select();
-		$select
-			->from($this->primaryGateway->getTable())
-			->join('users_has_groups', 'users_has_groups.users_id = users.id')
-			->group('id')
-			->where->in("users_has_groups.groups_id", $groups);
-		$rowSet = $this->primaryGateway->selectWith($select);
-
-//		$rowSet = $this->primaryGateway->select(
-//			function(Select $select) use ($groups) {
-//				$select->join('users_has_groups', 'users_has_groups.users_id = users.id');
-//				$select->where("users_has_groups.groups_id IN($groups)");
-//				$select->group('id');
-//				//echo $select->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
-//			}
-//		);
-
-		$users = array();
-		for($i = 0; $i < $rowSet->count(); $i++) {
-			$users[] = $rowSet->current();
-			$rowSet->next();
-		}
-
-		for($i = 0; $i < count($users); $i++) {
-			$this->getUserAccess($users[$i]);
-		}
-		
-		return $users;
+		throw new \DomainException('Method is deprecated. Use UserService::getUsersByCurrentGroup()');
 	}
-	
+
+	/**
+	 * @deprecated
+	 */
+	public function getUsersByGroupId($id) {
+		throw new \DomainException('Method is deprecated. Use UserService::getUsersByGroupId()');
+	}
 
 	/**
 	 * Get logged in user
+	 * @deprecated Use UserService::getCurrentUser() in stead
 	 */
 	public function getCurrentUser() {
-		// Console user
-		if($this->request instanceof \Zend\Console\Request) {
-			$user = new User();
-			$user->username = 'console';
-			$user->logintype = 'console';
-			self::$currentUser = &$user;
-			self::$currentIdentity = 'console';
-			return self::$currentUser;
-		}
-
-		$identity = $this->authService->getIdentity();
-		if($identity == self::$currentIdentity) {
-			return self::$currentUser;
-		}
-
-		$user = $this->getUser($identity);
-		if(!$user) {
-			$user = new User();
-			$user->username = $identity;
-			if(substr($identity, 0, 6) == 'elfag-') {
-				$user->logintype = 'elfag';
-				$user->updateAccess($identity, array('access_level' => 5));
-			}
-		}
-		self::$currentUser = &$user;
-		self::$currentIdentity = &$identity;
-
-		return self::$currentUser;
-
-
-//
-//		if(self::$currentUser == null) {
-//			$identity = $this->authService->getIdentity();
-//			if($identity) {
-//				$user = $this->getUser($identity);
-//				if(!$user) {
-//					 $user = new User();
-//					 $user->username = $identity;
-//					 if(substr($identity, 0, 6) == 'elfag-') {
-//					 	$user->logintype = 'elfag';
-//					 	$user->updateAccess($identity, array('access_level' => 5));
-//					 }
-//				}
-//				self::$currentUser = $user;
-//			}
-//			else self::$currentUser = null;
-//		}
-//		return self::$currentUser;
+		throw new \DomainException("Method deprecated. Use UserService::getCurrentUser()");
 	}
 
 	/**
@@ -149,7 +76,6 @@ class UserTable extends DbTable {
 		}
 		else {
 			$rowSet = $this->fetchAll(array('username' => $identity));
-			//r($rowSet);
 			if(count($rowSet) > 1)
 				throw new \Exception('Multiple users with same username. Something is wrong.');
 				
@@ -160,12 +86,9 @@ class UserTable extends DbTable {
 				
 			$identity = $rowSet[0];
 		}
-		
-		$this->getUserAccess($identity);
-		
 		return $identity;
 	}
-	
+
 	public function getUserByEmail($email) {
 		$rowSet = $this->fetchAll(array('email' => $email));
 		if(count($rowSet) > 1)
@@ -262,12 +185,13 @@ class UserTable extends DbTable {
 	 * @throws \Exception
 	 */
 	public function save($user) {
-		if($this->accessToSave($user) == false) return false;
+		//get the trace
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+		if($trace[1]['class'] != UserService::class) throw new \Exception('Save can only be done by UserService');
 
-		
 		// Existing user
 		$data = $user->databaseSaveArray();
-		$currentUser = $this->getCurrentUser();
+		$currentIdentity = $this->authService->getIdentity();
 
 		if($user->logintype == 'soap') {
 			$storedUser = $user;
@@ -291,7 +215,7 @@ class UserTable extends DbTable {
 						$storedUser->email = $value;
 						break;
 					case 'password':
-						if($currentUser->id == $user->id) {
+						if($currentIdentity == $user->username) {
 							$storedUser->password = $user->password;
 							Message::create(1, 'Password changed');
 						}
@@ -401,29 +325,12 @@ class UserTable extends DbTable {
 		}
 		return false;
 	}
-	
+
+	/**
+	 * @deprecated
+	 */
 	protected function accessToSave($user) {
-		$currentUser = $this->getCurrentUser();
-		
-		if($user->id) { // Existing user
-			// Same user
-			if($user->id == $currentUser->id) {
-				return true;
-			}
-			$user = $this->find($user->id);
-		}
-		else { // New user
-			if($user->username == $currentUser->username) return true;
-		}
-		
-		// Administrator of a soap-user
-		if($user->logintype == 'soap') {
-			$groups = array_intersect_key($user->access, $currentUser->access);
-			foreach($groups AS $key => $value) {
-				if($currentUser->getAccessLevel($key) >= 4) return true;
-			}
-		}
-		return false;
+		throw new \DomainException('Method decrepated. Use UserService::saveUser()');
 	}
 	
 	/**

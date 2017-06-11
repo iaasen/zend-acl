@@ -15,6 +15,8 @@ class AuthController extends AbstractActionController {
 	protected $authService;
 	/** @var  \Acl\Form\LoginForm */
 	protected $loginForm;
+	/** @var  \Acl\Service\UserService */
+	protected $userService;
 	/** @var  \Acl\Service\UserTable */
 	protected $userTable;
 	/** @var  \Acl\Model\AclStorage */
@@ -22,10 +24,11 @@ class AuthController extends AbstractActionController {
 	
 	protected $tables;
 
-	public function __construct($authService, $loginForm, $userTable, $sessionStorage)
+	public function __construct($authService, $loginForm, $userService, $userTable, $sessionStorage)
 	{
 		$this->authService = $authService;
 		$this->loginForm = $loginForm;
+		$this->userService = $userService;
 		$this->userTable = $userTable;
 		$this->sessionStorage = $sessionStorage;
 	}
@@ -61,14 +64,14 @@ class AuthController extends AbstractActionController {
 
 
 
-
 		/** @var Request $request */
 		$request = $this->getRequest();
 		if($request->isPost()) {
 			$form->setData($request->getPost());
 			if($form->isValid()) {
-				$this->authService->setIdentity($request->getPost('username'));
-				$this->authService->setCredential($request->getPost('password'));
+				$data = $form->getData();
+				$this->authService->setIdentity($data['username']);
+				$this->authService->setCredential($data['password']);
 
 				$result = $this->authService->authenticate();
 
@@ -78,45 +81,43 @@ class AuthController extends AbstractActionController {
 				
 				if($result->isValid()) {
 					$redirect = $this->url()->fromRoute('home');
-					
-					if($request->getPost('rememberMe') == 1) {
+
+					if ($request->getPost('rememberMe') == 1) {
 						$this->sessionStorage->setRememberMe(1);
 						$this->authService->setStorage($this->sessionStorage);
 					}
 
-					$user = $this->userTable->getUser($this->authService->getIdentity());
+					$user = $this->userService->getUserByUsername($this->authService->getIdentity());
 
-					if(!$user) { // Probably elfag-user and it's the first login
+
+					if (!$user) { // Probably elfag-user and it's the first login
 						return $this->redirect()->toRoute('user/createElfagUser');
 					}
 
-					
+
 					$user->last_login = time();
-					$this->userTable->save($user);
+					$this->userService->saveUser($user);
 
 					// Make sure current_group is set
-					if(!$user->current_group) {
-						if(count($user->access) > 1) {
+					if (!$user->current_group) {
+						if (count($user->access) > 1) {
 							return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
-						}
-						elseif(count($user->access) == 1) {
+						} elseif (count($user->access) == 1) {
 							$user->current_group = key($user->access);
 							$this->userTable->save($user);
-						}
-						else {
+						} else {
 							$this->redirect()->toRoute('user/noAccess');
 						}
 					}
-
 					// No access to the current current_group
-					if(!isset($user->access[$user->current_group])) {
+					if (!isset($user->access[$user->current_group])) {
 						return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
 					}
 
 					// Dispatch the login_successful event. Redirect if receiving a Response
 					$results = $this->getEventManager()->trigger('login_successful', $this, ['identity' => $result->getIdentity()]);
-					foreach($results as $result) {
-						if($result instanceof Response) {
+					foreach ($results as $result) {
+						if ($result instanceof Response) {
 							return $result;
 						}
 					}
