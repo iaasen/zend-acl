@@ -46,4 +46,8 @@ class AccessTable extends AbstractTable
 		]);
 	}
 
+	public function save($model) {
+		return parent::save($model);
+	}
+
 }

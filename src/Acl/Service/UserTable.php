@@ -6,15 +6,10 @@ use Acl\Model\Group;
 use Acl\Model\User;
 use Oppned\AbstractTable;
 use Zend\Db\Sql\Sql;
-use Zend\Db\Sql\Where;
 use Zend\Db\TableGateway\TableGateway;
-use Zend\Db\Sql\Select;
 use Oppned\Message;
-use Zend\Stdlib\RequestInterface;
 
 class UserTable extends AbstractTable {
-//	/** @var  User */
-//	protected static $currentUser;
 //	/** @var  string */
 //	protected static $currentIdentity;
 
@@ -99,7 +94,13 @@ class UserTable extends AbstractTable {
 		$user = $this->getUserAccess($user);
 		return $user;
 	}
-	
+
+	/**
+	 * TODO: Must be converted to not use currentUser
+	 * @param string $start
+	 * @param null|string $group
+	 * @return bool|string
+	 */
 	public function getUniqueUsername($start, $group = null) {
 		if($group == null) {
 			$currentUser = $this->getCurrentUser();
@@ -251,44 +252,22 @@ class UserTable extends AbstractTable {
 		}
 		return $id;
 	}
-	
+
+	/**
+	 * @deprecated
+	 */
 	public function addUserToGroup($user, $group) {
-		if($group instanceof Group) $group = $group->group;
-	
-		$user = $this->getUser($user->id);
-	
-		// User already member of the group
-		if(isset($user->access[$group])) return true;
-	
-	
-		$group = $this->groupTable->getGroup($group);
-		// Add user
-		if($group !== false) {
-			$insert = new \Zend\Db\Sql\Insert();
-			$insert->into('users_has_groups');
-			$insert->values(array(
-				'users_id' => $user->id,
-				'groups_id' => $group->id
-			));
-			//echo $insert->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
-			$sql = new Sql($this->primaryGateway->getAdapter());
-			$statement = $sql->prepareStatementForSqlObject($insert);
-			$statement->execute();
-			return true;
-	
-		}
-		// No access to group, or group does not exist.
-		return false;
-	
+		throw new \DomainException('Method deprecated. Use UserService::addUserToGroup()');
 	}
 	
 	/**
-	 * 
+	 * @deprecated
 	 * @param User $user
 	 * @param string $group
 	 * @return boolean
 	 */
 	public function saveUserAccess(User $user, $group) {
+		throw new \DomainException('Function is deprecated. Use UserService::saveUserAccess()');
 		if($group instanceof Group) $group = $group->group;
 		if(!$this->accessToSaveAccess($user, $group)) return false;
 		

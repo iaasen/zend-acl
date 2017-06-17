@@ -2,11 +2,9 @@
 
 namespace Acl\Service;
 
-use Acl\Model\User;
 use Acl\Model\Group;
 use Oppned\AbstractTable;
 use Zend\Db\Sql\Select;
-use Zend\Db\TableGateway\TableGateway;
 
 class GroupTable extends AbstractTable {
 	/** @var  \Acl\Service\AuthService */
@@ -22,15 +20,19 @@ class GroupTable extends AbstractTable {
 		return $this->getGroupById((int) $id);
 	}
 
+	public function getAllGroups() {
+		//get the trace
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+		if($trace[1]['class'] != UserService::class) throw new \Exception('Can only be called by UserService');
+
+		return self::fetchAll();
+	}
 
 	/**
-	 * Get available groups to current user.
 	 * @deprecated Use UserService::getGroupsByCurrentUser()
-	 * @param bool $all
-	 * @return Group[]
 	 */
 	public function getGroups($all = false) {
-		throw new \DomainException('Method is deprecated. Use UserService::getGroupsByCurrentUser()');
+		throw new \DomainException('Method is deprecated. Use UserService::getGroupsByCurrentUser() or UserService::getAllGroups()');
 	}
 
 	/**
@@ -76,6 +78,9 @@ class GroupTable extends AbstractTable {
 		else return false;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function getGroupsArray() {
 		throw new \DomainException('Method is deprecated.');
 	}
