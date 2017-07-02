@@ -2,7 +2,6 @@
 
 namespace Acl\Controller;
 
-use Acl\Model\Group;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
@@ -243,42 +242,6 @@ class UserController extends AbstractActionController {
 		));
 	}
 
-	/**
-	 * TODO createElfagUserAction not currently working
-	 */
-	public function createElfagUserAction() {
-	    if($this->currentUser->logintype != 'elfag') {
-	        Message::create(3, 'Ikke elfagbruker, kan ikke opprette');
-	        $this->redirect()->toRoute('home');
-        }
-
-        $user = $this->currentUser;
-        // Create user
-        $user->name = 'Systembruker';
-        $userId = $this->userTable->save($user);
-        $user->id = $userId;
-
-        $groupName = $this->currentUser->username;
-
-        $group = $this->userService->getGroupByName($groupName);
-        if(!$group) {
-            $group = new Group();
-            $group->group = $groupName;
-            $groupId = $this->groupTable->save($group);
-            $group->id = $groupId;
-        }
-
-        // Add user to group
-        $this->userService->addUserToGroup($user, $group);
-        // Add access
-        $user->setAccessLevel($group->group, 5);
-        $this->userService->saveUserAccess($user, $group);
-
-
-
-        $this->redirect()->toRoute('createUser');
-
-    }
 
 	/**
 	 * TODO createUserAction not currently working
@@ -287,7 +250,7 @@ class UserController extends AbstractActionController {
         $id = $this->params()->fromRoute('id');
         if($id == null) $this->redirect()->toRoute('user', array('action' => 'list'));
 
-        $group = $this->groupTable->getGroup($id);
+        $group = $this->userService->getGroupByName($id);
 
 		if(!$this->userTable->accessToCreateUser($group))
 			$this->redirect()->toRoute('user', array('action' => 'list'));
