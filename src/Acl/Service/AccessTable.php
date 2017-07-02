@@ -46,8 +46,29 @@ class AccessTable extends AbstractTable
 		]);
 	}
 
+	/**
+	 * @param Access $model
+	 * @return bool
+	 * @throws \Exception
+	 */
 	public function save($model) {
-		return parent::save($model);
+		$data = $model->databaseSaveArray();
+		$primaryKeys = [
+			'users_id' => $model->users_id,
+			'groups_id' => $model->groups_id,
+		];
+
+		if(isset($data['timestamp_updated'])) $data['timestamp_updated'] = date("Y-m-d H:i:s", time());
+
+		if($this->getAccess($model->users_id, $model->groups_id)) {
+			unset($data['users_id']);
+			unset($data['groups_id']);
+			$this->primaryGateway->update($data, $primaryKeys);
+		}
+		else {
+			$this->primaryGateway->insert($data);
+		}
+		return true;
 	}
 
 }

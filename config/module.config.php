@@ -196,7 +196,7 @@ return [
 						'options' => [
 							'route'    => '/tilgang',
 							'defaults' => [
-								'action'     => 'editaccess',
+								'action'     => 'editAccess',
 							],
 							'may_terminate' => true,
 						],

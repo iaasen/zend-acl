@@ -65,7 +65,7 @@ class UserTable extends AbstractTable {
 		if(!strlen($identity)) {
 			return false;
 		}
-		elseif(is_int($identity)) {
+		elseif(is_numeric($identity)) {
 			$rowSet = parent::find($identity);
 			$identity = $rowSet;
 		}
@@ -138,7 +138,7 @@ class UserTable extends AbstractTable {
 		$statement = $sql->prepareStatementForSqlObject($select);
 		$results = $statement->execute();
 		foreach($results AS $result) {
-			$user->updateAccess($result['group'], $result);
+			$user->setAccess($result['group'], $result);
 		}
 		return $user;
 	}
@@ -190,51 +190,13 @@ class UserTable extends AbstractTable {
 		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 		if($trace[1]['class'] != UserService::class) throw new \Exception('Save can only be done by UserService');
 
-		// Existing user
 		$data = $user->databaseSaveArray();
-		$currentIdentity = $this->authService->getIdentity();
 
-		if($user->logintype == 'soap') {
-			$storedUser = $user;
-		}
-		else {
-			if($user->id) { // Existing user
-				$storedUser = $this->find($user->id);
-			}
-			else { // New user
-				$storedUser = $user;
-			}
-
-			$storedData = $storedUser->databaseSaveArray();
-			foreach($data AS $key => $value) {
-				if($value === $storedData[$key]) continue;
-				switch($key) {
-					case 'name':
-						$storedUser->name = $value;
-						break;
-					case 'email':
-						$storedUser->email = $value;
-						break;
-					case 'password':
-						if($currentIdentity == $user->username) {
-							$storedUser->password = $user->password;
-							Message::create(1, 'Password changed');
-						}
-						break;
-					case 'current_group':
-						if(array_key_exists($value, $storedUser->access)) {
-							$storedUser->current_group = $value;
-						}
-						break;
-				}
-			}
-			$data = $storedUser->databaseSaveArray();
-		}
 		// Save to database
 		unset($data['id']);
 		unset($data['created']);
 		
-		$id = (int) $storedUser->id;
+		$id = (int) $user->id;
 		if ($id == 0) {
 			$data['created'] = date("Y-m-d H:i:s");
 			$this->primaryGateway->insert($data);
@@ -267,30 +229,31 @@ class UserTable extends AbstractTable {
 	 * @return boolean
 	 */
 	public function saveUserAccess(User $user, $group) {
-		throw new \DomainException('Function is deprecated. Use UserService::saveUserAccess()');
-		if($group instanceof Group) $group = $group->group;
-		if(!$this->accessToSaveAccess($user, $group)) return false;
-		
-		$access = $user->getAccessLevel($group);
-		$groupid = $this->groupTable->getGroupId($group);
-		
-		if($this->find($user->id)) {
-			$update = new \Zend\Db\Sql\Update();
-			$update->table('users_has_groups');
-			$update->where(array (
-				'users_id' => $user->id,
-				'groups_id' => $groupid,
-			));
-			$update->set(array('access_level' => $access));
-			//echo $update->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
-			
-			$sql = new Sql($this->primaryGateway->getAdapter());
-			$statement = $sql->prepareStatementForSqlObject($update);
-
-			$statement->execute();
-			return true;
-		}
-		return false;
+		throw new \DomainException('Method deprecated. Use UserService::saveUserAccess()');
+//		throw new \DomainException('Function is deprecated. Use UserService::saveUserAccess()');
+//		if($group instanceof Group) $group = $group->group;
+//		if(!$this->accessToSaveAccess($user, $group)) return false;
+//
+//		$access = $user->getAccessLevel($group);
+//		$groupid = $this->groupTable->getGroupId($group);
+//
+//		if($this->find($user->id)) {
+//			$update = new \Zend\Db\Sql\Update();
+//			$update->table('users_has_groups');
+//			$update->where(array (
+//				'users_id' => $user->id,
+//				'groups_id' => $groupid,
+//			));
+//			$update->set(array('access_level' => $access));
+//			//echo $update->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
+//
+//			$sql = new Sql($this->primaryGateway->getAdapter());
+//			$statement = $sql->prepareStatementForSqlObject($update);
+//
+//			$statement->execute();
+//			return true;
+//		}
+//		return false;
 	}
 	
 	public function accessToView($mixed, $object = 'user') {
@@ -313,45 +276,18 @@ class UserTable extends AbstractTable {
 	}
 	
 	/**
-	 * 
-	 * @param User $user
-	 * @param mixed $group
+	 * @deprecated
 	 */
 	public function accessToSaveAccess($user, $group) {
-		if($group instanceof Group) $group = $group->group;
-		$currentUser = $this->getCurrentUser();
-		
-		// Allow system to set access to newly created user
-		if($currentUser->created > (time() - 3600)) return true;
-		
-		// Not member of the same group
-		if(!isset($currentUser->access[$group])) {
-			Message::create(3, 'Kan ikke endre tilgangsnvå, bruker tilhører ikke samme firma som deg');
-			return false;
-		}
-		
-		// Access level too low
-		if($currentUser->access[$group]['access_level'] < 4) { // 4 = Admin
-			Message::create(3, 'Kan ikke endre tilgangsnivå, du er ikke administrator');
-			return false;
-		}
-		
-		// Not higher level than object
-		$checkUser = $this->getUser((int) $user->id);
-		if($currentUser->getAccessLevel($group) <= $checkUser->getAccessLevel($group)) {
-			Message::create(3, 'Kan ikke endre tilgangsnivå, du må ha høyere tilgang enn bruker du vil endre');
-			return false;
-		}
-		
-		// Can't set higher than own access level
-		if($currentUser->getAccessLevel($group) <= $user->getAccessLevel($group)) {
-			Message::create(3, 'Kan ikke endre tilgangsniva, du må sette lavere enn du har selv');
-			return false;
-		}
-		
-		return true;
+		throw new \DomainException('Method decrepated. Is moved to UserService::accessToSaveAccess()');
 	}
-	
+
+	/**
+	 * @deprecated Should be in UserService
+	 * @todo Move create user to UserService
+	 * @param $group
+	 * @return bool
+	 */
 	public function accessToCreateUser($group) {
 		if($group instanceof Group) $group = $group->group;
 		
@@ -369,32 +305,4 @@ class UserTable extends AbstractTable {
 
 		return true;
 	}
-	
-
-// 	public function find($id) {
-// 		$id = ( int ) $id;
-// 		$rowset = $this->tableGateway->select(array (
-// 			'id' => $id 
-// 		));
-// 		$row = $rowset->current();
-// 		if (! $row) {
-// 			throw new \Exception("Could not find row $id");
-// 		}
-// 		return $row;
-// 	}
-
-	/**
-	 * @return \Acl\Service\AuthService
-	 */
-//	public function getAuthService() {
-//		return $this->serviceLocator->get('AuthService');
-//	}
-	
-//	public function getGroupTable() {
-//		return $this->groupTable;
-//	}
-//
-//	public function setGroupTable($table) {
-//		$this->groupTable = $table;
-//	}
 }

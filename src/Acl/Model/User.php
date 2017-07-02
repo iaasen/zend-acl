@@ -17,14 +17,15 @@ namespace Acl\Model;
  * @property string $current_group
  */
 class User {
-//	public static $access_level = array (
-//		0 => 'None',
-//		1 => 'View',
-//		2 => 'Edit own', // Create and edit own
-//		3 => 'Edit all', // Edit others
-//		4 => 'Admin',
-//		5 => 'Master'
-//	);
+	public static $access_level = array (
+		0 => 'None',
+		1 => 'View',
+		2 => 'Edit own', // Create and edit own
+		3 => 'Edit all', // Edit others
+		4 => 'Admin',
+		5 => 'Master'
+	);
+
 	public static $login_types = array(
 		'console' => 'Console',
 		'default' => 'Local',
@@ -45,7 +46,9 @@ class User {
 		'created' => null,
 		'last_login' => null 
 	);
-	public $access = array ();
+
+	/** @var Access[] */
+	public $access = [];
 
 	public function __construct(array $data = null) {
 		$this->created = time();
@@ -61,9 +64,25 @@ class User {
 	}
 
 
-	public function updateAccess($group, $access) {
+	/**
+	 * @param Group|string $group
+	 * @param Access $access
+	 */
+	public function setAccess($group, $access) {
 		if($group instanceof Group) $group = $group->group;
 		$this->access[$group] = $access;
+	}
+
+	/**
+	 * @param Group|string $group
+	 * @param int $accessLevel
+	 */
+	public function setAccessLevel($group, $accessLevel) {
+		if($group instanceof Group) $group = $group->group;
+		if(!isset($this->access[$group])) {
+			$this->access[$group] = new Access();
+		}
+		$this->access[$group]->access_level = $accessLevel;
 	}
 
 	/**
@@ -83,6 +102,10 @@ class User {
 			return $this->access[$groupName]->access_level;
 		}
 		return 0;
+	}
+
+	public function getAccessLevelName($group = null) {
+		return self::$access_level[$this->getAccessLevel($group)];
 	}
 	
 	public function getValueOptions() {

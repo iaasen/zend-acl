@@ -12,8 +12,8 @@ namespace Acl\Service;
 use Acl\Model\Access;
 use Acl\Model\Group;
 use Acl\Model\User;
-use Zend\Db\Sql\Sql;
 use Zend\Http\PhpEnvironment\Request;
+use Oppned\Message;
 
 class UserService
 {
@@ -75,7 +75,7 @@ class UserService
 			$user->username = $identity;
 			if(substr($identity, 0, 6) == 'elfag-') {
 				$user->logintype = 'elfag';
-				$user->updateAccess($identity, array('access_level' => 5));
+				$user->setAccessLevel($identity, 5);
 			}
 		}
 		self::$currentUser = &$user;
@@ -102,7 +102,7 @@ class UserService
 		$accesses = $this->accessTable->getAccessesByUserId($user->id);
 		foreach($accesses AS $access) {
 			$group = $this->groupTable->getGroupById($access->groups_id);
-			$user->updateAccess($group->group, $access);
+			$user->setAccess($group->group, $access);
 		}
 		return $user;
 	}
@@ -150,7 +150,13 @@ class UserService
 	}
 
 	public function getGroupsByUserId($id) {
-		return $this->groupTable->getGroupsByUserId($id);
+		$accesses = $this->accessTable->getAccessesByUserId($id);
+		$groups = [];
+		foreach($accesses AS $access) {
+			$group = $this->getGroupById($access->groups_id);
+			if($group) $groups[] = $group;
+		}
+		return $groups;
 	}
 
 	public function getGroupById($id) {
@@ -168,6 +174,7 @@ class UserService
 	public function saveUser($user) {
 		$currentUser = $this->getCurrentUser();
 
+
 		if($user->id) { // Existing user
 			if($user->id != $currentUser->id) return false; // Not same user
 		}
@@ -182,6 +189,41 @@ class UserService
 				if($currentUser->getAccessLevel($key) <= 4) return false;
 			}
 		}
+
+		// Use stored user as base
+		if($user->logintype == 'soap') $storedUser = $user;
+		elseif($user->id) $storedUser = $this->userTable->find($user->id);
+		else $storedUser = $user;
+
+		$storedData = $storedUser->databaseSaveArray();
+		$data = $user->databaseSaveArray();
+
+
+		// Only approve the following changes
+		foreach($data AS $key => $value) {
+			if($value === $storedData[$key]) continue;
+
+			switch($key) {
+				case 'name':
+					$storedUser->name = $value;
+					break;
+				case 'email':
+					$storedUser->email = $value;
+					break;
+				case 'password':
+					if($this->getCurrentUser()->username == $user->username) {
+						$storedUser->password = $user->password;
+						Message::create(1, 'Password changed');
+					}
+					break;
+				case 'current_group':
+					if(array_key_exists($value, $storedUser->access)) {
+						$storedUser->current_group = $value;
+					}
+					break;
+			}
+		}
+
 		return $this->userTable->save($user);
 	}
 
@@ -214,27 +256,58 @@ class UserService
 		if(!$group instanceof Group) $group = $this->groupTable->getGroupByName($group);
 		if(!$this->accessToSaveAccess($user, $group)) return false;
 
-
-
-		$access = $user->getAccessLevel($group);
-		$groupid = $this->groupTable->getGroupId($group);
-
-		if($this->find($user->id)) {
-			$update = new \Zend\Db\Sql\Update();
-			$update->table('users_has_groups');
-			$update->where(array (
-				'users_id' => $user->id,
-				'groups_id' => $groupid,
-			));
-			$update->set(array('access_level' => $access));
-			//echo $update->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
-
-			$sql = new Sql($this->primaryGateway->getAdapter());
-			$statement = $sql->prepareStatementForSqlObject($update);
-
-			$statement->execute();
+		if($this->userTable->find($user->id)) {
+			$access = $this->accessTable->getAccess($user->id, $group->id);
+			if(!$access) {
+				$access = new Access();
+				$access->users_id = $user->id;
+				$access->groups_id = $group->id;
+			}
+			$access->access_level = $user->getAccessLevel($group->group);
+			$this->accessTable->save($access);
 			return true;
 		}
 		return false;
 	}
+
+	/**
+	 * @param User $user
+	 * @param mixed $group
+	 * @return bool
+	 */
+	public function accessToSaveAccess($user, $group) {
+		if($group instanceof Group) $group = $group->group;
+		$currentUser = $this->getCurrentUser();
+
+		// Allow system to set access to newly created user
+		if($currentUser->created > (time() - 3600)) return true;
+
+		// Not member of the same group
+		if(!$currentUser->getAccessLevel($group)) {
+			Message::create(3, 'Kan ikke endre tilgangsnivå, bruker tilhører ikke samme firma som deg');
+			return false;
+		}
+
+		// Access level too low
+		if($currentUser->getAccessLevel($group) < 4) { // 4 = Admin
+			Message::create(3, 'Kan ikke endre tilgangsnivå, du er ikke administrator');
+			return false;
+		}
+
+		// Not higher level than object
+		$checkUser = $this->getUserById($user->id);
+		if($currentUser->getAccessLevel($group) <= $checkUser->getAccessLevel($group)) {
+			Message::create(3, 'Kan ikke endre tilgangsnivå, du må ha høyere tilgang enn bruker du vil endre');
+			return false;
+		}
+
+		// Can't set higher than own access level
+		if($currentUser->getAccessLevel($group) <= $user->getAccessLevel($group)) {
+			Message::create(3, 'Kan ikke endre tilgangsniva, du må sette lavere enn du har selv');
+			return false;
+		}
+
+		return true;
+	}
+
 }

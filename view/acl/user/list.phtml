@@ -1,7 +1,9 @@
-<?php 
-$currentUser = $this->currentUser;
-$users = $this->users;
-$group = $this->group;
+<?php
+/**
+ * @var \Acl\Model\User $currentUser
+ * @var \Acl\Model\User[] $users
+ * @var \Acl\Model\Group $group
+ */
 ?>
 
 <?php $this->placeholder('sidebar_left')->captureStart() ?>
@@ -20,10 +22,8 @@ $group = $this->group;
 	<div class="panel-heading">
 		<b>Brukere</b>
 		<div class="btn-group pull-right">
-			<?php if($currentUser->access[$group->group]['access_level'] >= 4): ?>
+			<?php if($currentUser->getAccessLevel($group->group) >= 4): ?>
 				<a class="btn btn-default btn-sm" disabled="disabled" href="/user/createuser/<?php echo $group->id ?>">Ny bruker</a>
-				<a class="btn btn-default btn-sm" href="<?= $this->url('user/createSoapUser') ?>">Ny Vismakonto</a>
-				<a class="btn btn-primary btn-sm" href="<?= $this->url('user/editAccess', ['id' => $group->id]) ?>">Rediger tilgang</a>
 			<?php else: ?>
 				<a class="btn btn-default btn-sm" disabled="disabled">Ny bruker</a>
 				<a class="btn btn-primary btn-sm" disabled="disabled">Rediger tilgang</a>
@@ -41,7 +41,7 @@ $group = $this->group;
 			<th></th>
 		</tr>
 		<?php
-			foreach($this->users AS $user):
+			foreach($users AS $user):
 				if(isset($user->access[$group->group])) :
 				?>
 					<tr>
@@ -51,8 +51,8 @@ $group = $this->group;
 						<td><?php echo $user->email ?></td>
 						<td>
 						<?php
-							echo $this->translate($user::$access_level[$user->access[$group->group]['access_level']]);
-							echo ($user->access[$group->group]['onnshop']) ? ', Sende bestilling' : '';
+							echo $this->translate($user->getAccessLevelName($group->group));
+							//echo ($user->access[$group->group]['onnshop']) ? ', Sende bestilling' : '';
 						?>
 						</td>
 						<td>

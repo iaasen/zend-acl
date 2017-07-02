@@ -32,7 +32,7 @@
 		<th>Sende bestilling</th>
 	</tr>
 	
-	<?php foreach($this->users AS $user): 
+	<?php foreach($users AS $user):
 		$id = $user->id;
 		$disabled = ($access[$user->id]) ? '' : ' disabled';
 	?>
@@ -43,7 +43,7 @@
 				<select name="users[<?php echo $id ?>][access_level]"<?php echo $disabled ?>>
 				<?php
 					foreach($user::$access_level AS $key => $value) {
-						$selected = ($user->access[$group->group]['access_level'] == $key) ? ' selected="selected"' : '';
+						$selected = ($user->getAccessLevel($group->group) == $key) ? ' selected="selected"' : '';
 						$disabledOption = ($currentUser->access[$group->group]['access_level'] <= $key) ? ' disabled' : '';
 						echo '<option value="' . $key . '"' . $selected . $disabledOption . '>' . $value . '</option>';
 					}
