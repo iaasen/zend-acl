@@ -1,17 +1,6 @@
 <?php
 namespace Acl;
 
-use Acl\Model\User;
-use Acl\Service\UserTable;
-use Acl\Model\Group;
-use Acl\Service\GroupTable;
-use Acl\View\Helper\GroupselectionWidget;
-
-//use Zend\Authentication\Storage;
-//use Zend\Authentication\AuthenticationService;
-//use Zend\Authentication\Adapter\DbTable as DbTableAuthAdapter;
-use Zend\Db\ResultSet\ResultSet;
-use Zend\Db\TableGateway\Feature\RowGatewayFeature;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\Mvc\ModuleRouteListener;
@@ -24,7 +13,6 @@ use Zend\Session\SaveHandler\DbTableGatewayOptions;
 use Acl\Service\AuthService;
 use Acl\Model\AuthLocalAdapter;
 use Acl\Model\AuthSoapAdapter;
-use Acl\Model\AuthElfagAdapter;
 
 
 class Module implements AutoloaderProviderInterface {
@@ -76,11 +64,13 @@ class Module implements AutoloaderProviderInterface {
 			}
 				
 			if($acl->hasIdentity()) {
-				$bugsnag->registerCallback(function (\Bugsnag\Report $report) use ($acl) {
-					$report->setUser([
-						'username' => $acl->getIdentity(),
-					]);
-				});
+				if($bugsnag) {
+					$bugsnag->registerCallback(function (\Bugsnag\Report $report) use ($acl) {
+						$report->setUser([
+							'username' => $acl->getIdentity(),
+						]);
+					});
+				}
 				return;
 			}
 			$name = $match->getMatchedRouteName();
