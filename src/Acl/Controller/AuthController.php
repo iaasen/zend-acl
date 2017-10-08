@@ -4,6 +4,7 @@ namespace Acl\Controller;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Mvc\Plugin\FlashMessenger\FlashMessenger;
 use Zend\View\Model\ViewModel;
 use Zend\Crypt\Password\Bcrypt;
 
@@ -21,6 +22,8 @@ class AuthController extends AbstractActionController {
 	protected $userTable;
 	/** @var  \Acl\Model\AclStorage */
 	protected $sessionStorage;
+	/** @var  FlashMessenger */
+	protected $flashMessenger;
 	
 	protected $tables;
 
@@ -51,7 +54,7 @@ class AuthController extends AbstractActionController {
 
 		$viewModel = new ViewModel([
 			'form'		=> $_form,
-			'messages'	=> $this->flashmessenger()->getMessages(),
+			'messages'	=> $this->getFlashMessenger()->getMessages(),
 		]);
 		//$viewModel->setTemplate('auth/login');
 		return $viewModel;
@@ -76,7 +79,7 @@ class AuthController extends AbstractActionController {
 				$result = $this->authService->authenticate();
 
 				foreach($result->getMessages() as $message) {
-					$this->flashmessenger()->addMessage($message);
+					$this->getFlashMessenger()->addMessage($message);
 				}
 				
 				if($result->isValid()) {
@@ -155,12 +158,20 @@ class AuthController extends AbstractActionController {
 		$this->sessionStorage->forgetMe();
 		$this->authService->clearIdentity();
 		
-		$this->flashmessenger()->addMessage('Du er logget ut');
+		$this->getFlashMessenger()->addMessage('Du er logget ut');
 		return $this->redirect()->toRoute('auth/login');
 	}
 	
 	public function createuserAction() {
 		
+	}
+
+	/**
+	 * @return FlashMessenger
+	 */
+	protected function getFlashMessenger() {
+		if(!$this->flashMessenger) $this->flashMessenger = new FlashMessenger();
+		return $this->flashMessenger;
 	}
 	
 }

@@ -5,7 +5,7 @@ use Zend\Db\TableGateway\TableGateway;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Router\Http\RouteMatch;
 use Zend\Session\SessionManager;
 use Zend\Session\Container;
 use Zend\Session\SaveHandler\DbTableGateway;
@@ -50,7 +50,7 @@ class Module implements AutoloaderProviderInterface {
 		$acl = $serviceManager->get('Acl\AuthService');
 		$list = $this->whitelist;
 	
-		$eventManager->attach(MvcEvent::EVENT_ROUTE, function($e) use ($list, $acl) {
+		$eventManager->attach(MvcEvent::EVENT_ROUTE, function(MvcEvent $e) use ($list, $acl) {
 			/** @var \Bugsnag\Client $bugsnag */
 			global $bugsnag;
 
@@ -62,7 +62,7 @@ class Module implements AutoloaderProviderInterface {
 			if(!$match instanceof RouteMatch) {
 				return;
 			}
-				
+
 			if($acl->hasIdentity()) {
 				if($bugsnag) {
 					$bugsnag->registerCallback(function (\Bugsnag\Report $report) use ($acl) {
@@ -95,8 +95,9 @@ class Module implements AutoloaderProviderInterface {
 
 	}
 	
-	public function bootstrapSession($e)
+	public function bootstrapSession(MvcEvent $e)
 	{
+		/** @var \Zend\Session\SessionManager $session */
 		$session = $e->getApplication()
 			->getServiceManager()
 			->get('Zend\Session\SessionManager');
