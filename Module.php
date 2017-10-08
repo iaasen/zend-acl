@@ -57,6 +57,7 @@ class Module implements AutoloaderProviderInterface {
 			if($e->getRequest() instanceof \Zend\Console\Request) return;
 			
 			$match = $e->getRouteMatch();
+
 			$redirect = $_SERVER['REQUEST_URI'];
 
 			if(!$match instanceof RouteMatch) {
@@ -108,92 +109,9 @@ class Module implements AutoloaderProviderInterface {
 		return include __DIR__ . '/config/module.config.php';
 	}
 	
-//	public function getViewHelperConfig() {
-//		return array(
-//			'factories' => array(
-//				'groupselection' => function ($sm) {
-//					$locator = $sm->getServiceLocator();
-//					$helper = new GroupselectionWidget();
-//					return $helper;
-//				}
-//			)
-//		);
-//	}
-	
-	
-	
 	public function getServiceConfig() {
 		return array(
 			'factories' => array(
-//				'Acl\Form\LoginForm' => function($sm) {
-//					return new \Acl\Form\LoginForm();
-//				},
-//				'Acl\Model\AclStorage'	=> function($sm) {
-//					return new \Acl\Model\AclStorage('acl_auth');
-//				},
-//				'Acl\Model\AclTable'	=> function($sm) {
-//					$_tableGateway = $sm->get('AclTableGateway');
-//					$_table = new UserTable($_tableGateway);
-//
-//					return $_table;
-//				},
-//				'AclTableGateway'		=> function($sm) {
-//					$_dbAdapter = $sm->get('Db\Acl');
-//					$_resultSetPrototype = new ResultSet();
-//					$_resultSetPrototype->setArrayObjectPrototype(new User());
-//					return new TableGateway('users', $_dbAdapter, new RowGatewayFeature('id'), $_resultSetPrototype);
-//				},
-//				'User' => function($sm) {
-//					$model = new User();
-//					return $model;
-//				},
-//				'UserTable' => function ($sm) {
-//					$tableGateway = $sm->get('UserTableGateway');
-//					$table = new UserTable($tableGateway);
-//					$table->setGroupTable($sm->get('GroupTable'));
-//					return $table;
-//				},
-//				'UserTableGateway' => function ($sm) {
-//					$dbAdapter = $sm->get('Db\Acl');
-//					$resultSetPrototype = new ResultSet();
-//					$resultSetPrototype->setArrayObjectPrototype($sm->get('User'));
-//					return new TableGateway('users', $dbAdapter, null, $resultSetPrototype);
-//					//return new TableGateway('users', $dbAdapter, new RowGatewayFeature('id'), $resultSetPrototype);
-//				},
-//				'Group' => function($sm) {
-//					$model = new Group();
-//					return $model;
-//				},
-//				'GroupTable' => function ($sm) {
-//					$tableGateway = $sm->get('GroupTableGateway');
-//					$table = new GroupTable($tableGateway);
-//					return $table;
-//				},
-//				'GroupTableGateway' => function ($sm) {
-//					$dbAdapter = $sm->get('Db\Acl');
-//					$resultSetPrototype = new ResultSet();
-//					$resultSetPrototype->setArrayObjectPrototype($sm->get('Group'));
-//					return new TableGateway('groups', $dbAdapter, null, $resultSetPrototype);
-//				},
-//				'Acl\AuthService' => function($sm) {
-//					$dbAdapter = $sm->get('Db\Acl');
-//					$authLocal = $sm->get('Acl\AuthLocalAdapter');
-//					$authElfag = new AuthElfagAdapter();
-//					$authService = new AuthService();
-//
-//					$authService->addAdapter($authLocal);
-//					$authService->addAdapter($authElfag);
-//					$authService->setStorage($sm->get('Acl\Model\AclStorage'));
-//					return $authService;
-//					/*
-//					$dbAdapter = $sm->get('Db\Acl');
-//					$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'users', 'username', 'password');
-//					$authService = new AuthenticationService();
-//					$authService->setAdapter($dbTableAuthAdapter);
-//					$authService->setStorage($sm->get('Acl\Model\AclStorage'));
-//					return $authService;
-//					*/
-//				},
 				'Acl\AuthSoapService' => function($sm) {
 					//$dbAdapter = $sm->get('Db\Acl');
 					$authSoap = $sm->get('Acl\AuthSoapAdapter');
