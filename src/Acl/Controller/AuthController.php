@@ -107,7 +107,7 @@ class AuthController extends AbstractActionController {
 							return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
 						} elseif (count($user->access) == 1) {
 							$user->current_group = key($user->access);
-							$this->userTable->save($user);
+							$this->userService->saveUser($user);
 						} else {
 							$this->redirect()->toRoute('user/noAccess');
 						}
