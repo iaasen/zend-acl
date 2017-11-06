@@ -8,8 +8,9 @@ use Zend\Authentication\Result;
 class AuthElfagAdapter extends AbstractAdapter {
 
 	protected $identityPrefix = 'elfag-';
-	protected $url = 'http://elfag.no/intranett/checkLogin.php';
-	
+	//protected $url = 'http://elfag.no/intranett/checkLogin.php';
+	protected $url = 'http://batcave.no/kristian/elfag-intranett/checkLogin.php';
+
 	/**
 	 * Sets username and password for authentication
 	 *
