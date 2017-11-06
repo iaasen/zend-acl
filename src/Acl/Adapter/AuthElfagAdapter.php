@@ -1,6 +1,6 @@
 <?php
 
-namespace Acl\Model;
+namespace Acl\Adapter;
 
 use Zend\Authentication\Adapter\AbstractAdapter;
 use Zend\Authentication\Result;

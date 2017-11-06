@@ -4,25 +4,27 @@ namespace Acl\Service;
 
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Adapter\AdapterInterface;
-use Zend\EventManager\EventManagerAwareInterface;
-use Zend\EventManager\EventManagerInterface;
+use Zend\Authentication\Result;
 
 class AuthService extends AuthenticationService {
-	
-	public $adapter = array();
+
+	/** @var AdapterInterface[] */
+	public $adapters = [];
+	/** @var  string */
 	public $identity;
+	/** @var  string */
 	public $credential;
 
 	/** @var  \Zend\EventManager\EventManager */
 	protected $eventManager;
 	
 	public function setAdapter(AdapterInterface $adapter) {
-		$this->adapter = array($adapter);
+		$this->adapters = array($adapter);
 		return $this;
 	}
 	
 	public function addAdapter(AdapterInterface $adapter) {
-		$this->adapter[] = $adapter;
+		$this->adapters[] = $adapter;
 		return $this;
 	}
 	
@@ -39,17 +41,19 @@ class AuthService extends AuthenticationService {
 	 * authenticate is extended to allow for multiple adapters
 	 * identity/credential is set for each adapter;
 	 * @see \Zend\Authentication\AuthenticationService::authenticate()
+	 * @param AdapterInterface|null $adapter
+	 * @return \Zend\Authentication\Result
 	 */
 	public function authenticate(AdapterInterface $adapter = null) {
 		if($adapter) $adapters = array($adapter);
-		else $adapters = $this->adapter;
+		else $adapters = $this->adapters;
 		
 		foreach($adapters AS $adapter) {
 			$adapter->setIdentity($this->identity);
 			$adapter->setCredential($this->credential);
 			
 			$result = $adapter->authenticate();
-			
+
 			if ($this->hasIdentity()) {
 				$this->clearIdentity();
 			}
@@ -59,8 +63,10 @@ class AuthService extends AuthenticationService {
 				//$this->eventManager->trigger('login_successful', null, ['identity' => $result->getIdentity()]);
 				return $result;
 			}
+
+			if(count($adapters) == 1) return $result;
 		}
-		return $result;
+		return new Result(Result::FAILURE, null);
 	}
 
 }

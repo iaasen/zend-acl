@@ -1,13 +1,12 @@
 <?php
 
-namespace Acl\Model;
+namespace Acl\Adapter;
 
 use Zend\Authentication\Adapter\DbTable\AbstractAdapter AS AbstractDbAdapter;
 use Zend\Authentication\Result;
 use Zend\Crypt\Password\Bcrypt;
-use General\Message;
 
-class AuthSoapAdapter extends AbstractDbAdapter {
+class AuthLocalAdapter extends AbstractDbAdapter {
 
 
 	/**
@@ -34,7 +33,7 @@ class AuthSoapAdapter extends AbstractDbAdapter {
 		$select->from($this->tableName);
 		$select->columns(array($this->credentialColumn));
 		$select->where->equalTo($this->identityColumn, $this->identity);
-		$select->where->equalTo('logintype', 'soap');
+		$select->where->equalTo('logintype', 'default');
 		//echo $select->getSqlString($this->zendDb->getPlatform());
 		return $select;
 	}

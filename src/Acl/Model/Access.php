@@ -9,7 +9,7 @@
 namespace Acl\Model;
 
 
-use Oppned\AbstractModel;
+use Iaasen\Model\AbstractModel;
 
 /**
  * Class Access

@@ -10,9 +10,6 @@ use Zend\Session\SessionManager;
 use Zend\Session\Container;
 use Zend\Session\SaveHandler\DbTableGateway;
 use Zend\Session\SaveHandler\DbTableGatewayOptions;
-use Acl\Service\AuthService;
-use Acl\Model\AuthLocalAdapter;
-use Acl\Model\AuthSoapAdapter;
 
 
 class Module implements AutoloaderProviderInterface {
@@ -112,22 +109,22 @@ class Module implements AutoloaderProviderInterface {
 	public function getServiceConfig() {
 		return array(
 			'factories' => array(
-				'Acl\AuthSoapService' => function($sm) {
-					//$dbAdapter = $sm->get('Db\Acl');
-					$authSoap = $sm->get('Acl\AuthSoapAdapter');
-					$authService = new AuthService();
-					$authService->addAdapter($authSoap);
-					$authService->setStorage($sm->get('Acl\Model\AclStorage'));
-					//$logger = new \Zend\Log\Logger;
-					//$logger->addWriter('stream', null, array('stream' => 'c:\log.txt'));
-					return $authService;
-				},
-				'Acl\AuthLocalAdapter' => function($sm) {
-					return new AuthLocalAdapter($sm->get('Db\Acl'), 'users', 'username', 'password');
-				},
-				'Acl\AuthSoapAdapter' => function($sm) {
-					return new AuthSoapAdapter($sm->get('Db\Acl'), 'users', 'username', 'password');
-				},
+//				'Acl\AuthSoapService' => function($sm) {
+//					//$dbAdapter = $sm->get('Db\Acl');
+//					$authSoap = $sm->get('Acl\AuthSoapAdapter');
+//					$authService = new AuthService();
+//					$authService->addAdapter($authSoap);
+//					$authService->setStorage($sm->get('Acl\Model\AclStorage'));
+//					//$logger = new \Zend\Log\Logger;
+//					//$logger->addWriter('stream', null, array('stream' => 'c:\log.txt'));
+//					return $authService;
+//				},
+//				'Acl\AuthLocalAdapter' => function($sm) {
+//					return new AuthLocalAdapter($sm->get('Db\Acl'), 'users', 'username', 'password');
+//				},
+//				'Acl\AuthSoapAdapter' => function($sm) {
+//					return new AuthSoapAdapter($sm->get('Db\Acl'), 'users', 'username', 'password');
+//				},
 				'Zend\Session\SessionManager' => function ($sm) {
 					$conf = $sm->get('config');
 					$conf = $conf['session'];
@@ -139,16 +136,18 @@ class Module implements AutoloaderProviderInterface {
 						$sessionConfig->setOptions($options);
 					}
 				
-					$tableGateway = $sm->get('SessionTableGateway');
+					//$tableGateway = $sm->get('SessionTableGateway');
+					$dbAdapter = $sm->get('Db\Acl');
+					$tableGateway = new TableGateway('sessions', $dbAdapter);
 					$saveHandler = new DbTableGateway($tableGateway, new DbTableGatewayOptions());
 					$sessionManager = new SessionManager($sessionConfig, null, $saveHandler);
 					Container::setDefaultManager($sessionManager);
 					return $sessionManager;
 				},
-				'SessionTableGateway' => function ($sm) {
-					$dbAdapter = $sm->get('Db\Acl');
-					return new TableGateway('sessions', $dbAdapter);
-				},
+//				'SessionTableGateway' => function ($sm) {
+//					$dbAdapter = $sm->get('Db\Acl');
+//					return new TableGateway('sessions', $dbAdapter);
+//				},
 				
 			),
 		);

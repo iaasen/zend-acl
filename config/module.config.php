@@ -3,20 +3,27 @@ use Acl\Controller\AuthController;
 use Acl\Controller\UserController;
 
 return [
+	'elfag2' => [
+		'base_url' => 'https://api.elfag.no/wp-json/jwt-auth/v1/',
+	],
 	'acl' => [
 		'superuser_only' => false,
 	],
 	'service_manager' => [
 		'invokables' => [
+			\Acl\Adapter\AuthElfagAdapter::class => \Acl\Adapter\AuthElfagAdapter::class,
 			\Acl\Form\LoginForm::class => \Acl\Form\LoginForm::class,
 			\Acl\Model\Access::class => \Acl\Model\Access::class,
 			\Acl\Model\Group::class => \Acl\Model\Group::class,
 			\Acl\Model\User::class => \Acl\Model\User::class,
 		],
 		'factories' => [
+			\Acl\Adapter\AuthLocalAdapter::class => \Acl\Adapter\AuthLocalAdapterFactory::class,
+			\Acl\Adapter\AuthElfag2Adapter::class => \Acl\Adapter\AuthElfag2AdapterFactory::class,
 			\Acl\Model\AclStorage::class => \Acl\Model\AclStorageFactory::class,
 			\Acl\Service\AccessTable::class => \Acl\Service\AccessTableFactory::class,
 			\Acl\Service\AuthService::class => \Acl\Service\AuthServiceFactory::class,
+			\Acl\Service\Elfag2Transport::class => \Acl\Service\Elfag2TransportFactory::class,
 			\Acl\Service\GroupTable::class => \Acl\Service\GroupTableFactory::class,
 			\Acl\Service\UserService::class => \Acl\Service\UserServiceFactory::class,
 			\Acl\Service\UserTable::class => \Acl\Service\UserTableFactory::class,
