@@ -40,7 +40,9 @@ class AuthElfag2Adapter extends AbstractAdapter
 		catch(ClientException $e) {
 			$response = json_decode($e->getResponse()->getBody()->__toString());
 			if($response->code == '[jwt_auth] incorrect_password') return new Result(Result::FAILURE_CREDENTIAL_INVALID, null);
+			elseif($response->code == '[jwt_auth] empty_password') return new Result(Result::FAILURE_CREDENTIAL_INVALID, null);
 			elseif($response->code == '[jwt_auth] invalid_email') return new Result(Result::FAILURE_IDENTITY_NOT_FOUND, null);
+			elseif($response->code == '[jwt_auth] invalid_username') return new Result(Result::FAILURE_IDENTITY_NOT_FOUND, null);
 			else throw $e;
 		}
 	}
