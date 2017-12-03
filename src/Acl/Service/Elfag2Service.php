@@ -11,6 +11,8 @@ namespace Acl\Service;
 
 use Acl\Model\Group;
 use Acl\Model\User;
+use Zend\Mail\Transport\Smtp AS TransportSmtp;
+use Zend\Mail\Message AS MailMessage;
 
 class Elfag2Service
 {
@@ -18,11 +20,14 @@ class Elfag2Service
 	protected $userService;
 	/** @var GroupTable */
 	protected $groupTable;
+	/** @var TransportSmtp */
+	protected $mailTransport;
 
-	public function __construct($userService, $groupTable)
+	public function __construct($userService, $groupTable, $mailTransport)
 	{
 		$this->userService = $userService;
 		$this->groupTable = $groupTable;
+		$this->mailTransport = $mailTransport;
 	}
 
 	/**
@@ -92,5 +97,18 @@ class Elfag2Service
 		// Update user
 		$user->current_group = $group->group;
 		$this->userService->saveUser($user);
+	}
+
+	public function sendEmailAboutMissingGroup(User $user) {
+		$mail = new MailMessage();
+		$mail->setEncoding("UTF-8");
+		$mail->setFrom('reklamasjon@oppned.com');
+		$mail->addTo('ingvar@aasenit.no');
+		$mail->setSubject($user->name . ' mangler kobling til ' . $user->ludens_company->name);
+		$mail->setBody(
+			'Bruker:' . PHP_EOL .
+			iconv('utf-8', 'iso8859-1', print_r($user->getArrayCopy(), true)) . PHP_EOL . PHP_EOL
+		);
+		$this->mailTransport->send($mail);
 	}
 }

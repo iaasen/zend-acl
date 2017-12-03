@@ -236,6 +236,15 @@ return [
 							]
 						]
 					],
+					'missing-elfag2-group' => [
+						'type' => \Zend\Router\Http\Literal::class,
+						'options' => [
+							'route' => '/nytt-firma/mangler',
+							'defaults' => [
+								'action' => 'missingElfag2Group'
+							]
+						]
+					],
 					'selectGroup' => [
 						'type' => 'literal',
 						'options' => [

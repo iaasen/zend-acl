@@ -397,9 +397,8 @@ class UserController extends AbstractActionController {
 				$this->elfag2Service->createGroupFromUser($user);
 			}
 			elseif($answer == 'missing') {
-				~r("missing");
-
-
+				$this->elfag2Service->sendEmailAboutMissingGroup($user);
+				return $this->redirect()->toRoute('user/missing-elfag2-group');
 			}
 			elseif(is_numeric($answer)) {
 				$answer = (int) $answer;
@@ -408,13 +407,17 @@ class UserController extends AbstractActionController {
 				}
 			}
 
-			$this->redirect()->toRoute('home');
+			return $this->redirect()->toRoute('home');
 		}
 
 		return [
 			'groups' => $groups,
 			'user' => $user,
 		];
+	}
+
+	public function missingElfag2GroupAction() {
+
 	}
 	
 	public function selectGroupAction() {
