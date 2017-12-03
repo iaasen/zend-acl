@@ -28,6 +28,7 @@ class Elfag2ServiceFactory implements FactoryInterface
 	public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
 	{
 		$userService = $container->get(UserService::class);
-		return new Elfag2Service($userService);
+		$groupTable = $container->get(GroupTable::class);
+		return new Elfag2Service($userService, $groupTable);
 	}
 }

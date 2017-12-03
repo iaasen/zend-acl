@@ -227,6 +227,15 @@ return [
 							]
 						]
 					],
+					'create-elfag2-group' => [
+						'type' => \Zend\Router\Http\Literal::class,
+						'options' => [
+							'route' => '/nytt-firma',
+							'defaults' => [
+								'action' => 'createElfag2Group'
+							]
+						]
+					],
 					'selectGroup' => [
 						'type' => 'literal',
 						'options' => [

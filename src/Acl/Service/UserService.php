@@ -89,8 +89,14 @@ class UserService
 		return $this->populateUser($user);
 	}
 
-	public function getUserByUsername($username, $loginType = 'default') {
-		$user = $this->userTable->getUser($username, $loginType);
+	public function getUserByUsername($username) {
+		$user = $this->userTable->getUser($username);
+		if(!$user) return false;
+		return $this->populateUser($user);
+	}
+
+	public function getUserByIdentityAndLogintype($identity, $loginType) {
+		$user = $this->userTable->getUserByIdentityAndLogintype($identity, $loginType);
 		if(!$user) return false;
 		return $this->populateUser($user);
 	}
@@ -169,8 +175,23 @@ class UserService
 	}
 
 	/**
+	 * @param string $name
+	 * @return Group[]
+	 * @throws \Exception
+	 */
+	public function getGroupsMatchingCompanyName(string $name) {
+		$groups = $this->groupTable->getAllGroups();
+		$matchedGroups = [];
+		foreach($groups AS $group) {
+			if(levenshtein($group->name, $name) < 3) $matchedGroups[] = $group;
+		}
+		return $matchedGroups;
+	}
+
+	/**
 	 * @param User $user
 	 * @return bool|int
+	 * @throws \Exception
 	 */
 	public function saveUser($user) {
 		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
@@ -236,6 +257,7 @@ class UserService
 	 * @param User $user
 	 * @param Group $group
 	 * @return bool
+	 * @throws \Exception
 	 */
 	public function addUserToGroup(User $user, Group $group) {
 		$user = $this->getUserById($user->id);
@@ -244,7 +266,7 @@ class UserService
 		// User already member of the group
 		if(isset($user->access[$group->name])) return true;
 
-		// Add user
+		// Add access
 		$access = new Access();
 		$access->users_id = $user->id;
 		$access->groups_id = $group->id;
@@ -256,6 +278,7 @@ class UserService
 	 * @param User $user
 	 * @param Group $group
 	 * @return bool
+	 * @throws \Exception
 	 */
 	public function saveUserAccess(User $user, $group) {
 		if(!$group instanceof Group) $group = $this->groupTable->getGroupByName($group);
@@ -285,7 +308,13 @@ class UserService
 		$currentUser = $this->getCurrentUser();
 
 		// Allow system to set access to newly created user
-		if($currentUser->created > (time() - 3600)) return true;
+		if($currentUser->timestamp_created->getTimestamp() > (time() - 3600)) return true;
+
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+		if($trace[2]['class'] == Elfag2Service::class) return true;
+
+
+
 
 		// Not member of the same group
 		if(!$currentUser->getAccessLevel($group)) {

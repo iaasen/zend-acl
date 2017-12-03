@@ -2,6 +2,7 @@
 
 namespace Acl\Controller;
 
+use Acl\Service\Elfag2Service;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
@@ -32,13 +33,16 @@ class UserController extends AbstractActionController {
 	protected $groupTable;
 	/** @var  \Acl\Service\UserService */
 	protected $userService;
+	/** @var Elfag2Service */
+	protected $elfag2Service;
 
-	public function __construct($currentUser, $userTable, $groupTable, $userService)
+	public function __construct($currentUser, $userTable, $groupTable, $userService, $elfag2Service)
 	{
 		$this->currentUser = $currentUser;
 		$this->userTable = $userTable;
 		$this->groupTable = $groupTable;
 		$this->userService = $userService;
+		$this->elfag2Service = $elfag2Service;
 	}
 
 //	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
@@ -373,6 +377,44 @@ class UserController extends AbstractActionController {
 			'group' => $group,
 			'form' => $form,
 		));
+	}
+
+	/**
+	 * @return array
+	 * @throws \Exception
+	 */
+	public function createElfag2GroupAction() {
+		$user = $this->currentUser;
+
+		$groups = $this->userService->getGroupsMatchingCompanyName($user->ludens_company->name);
+
+		/** @var Request $request */
+		$request = $this->getRequest();
+		if($request->isPost()) {
+			$answer = $request->getPost()->get('company');
+
+			if($answer == 'new') {
+				$this->elfag2Service->createGroupFromUser($user);
+			}
+			elseif($answer == 'missing') {
+				~r("missing");
+
+
+			}
+			elseif(is_numeric($answer)) {
+				$answer = (int) $answer;
+				foreach($groups AS $group) {
+					if($group->id == $answer) $this->elfag2Service->connectUserToGroup($user, $group);
+				}
+			}
+
+			$this->redirect()->toRoute('home');
+		}
+
+		return [
+			'groups' => $groups,
+			'user' => $user,
+		];
 	}
 	
 	public function selectGroupAction() {

@@ -131,7 +131,11 @@ class GroupTable extends AbstractTable {
 	 * @throws \Exception
 	 */
 	public function save($model) {
-		if (isset($this->currentUser->access[$model->group])) {
+		$elfag2Service = false;
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+		if($trace[1]['class'] == Elfag2Service::class) $elfag2Service = true;
+
+		if ($elfag2Service || isset($this->currentUser->access[$model->group])) {
 			$data = $model->databaseSaveArray();
 			unset($data->id);
 			
@@ -150,6 +154,7 @@ class GroupTable extends AbstractTable {
 					throw new \Exception('id does not exist');
 				}
 			}
+			$model->id = $id;
 			return $id;
 		}
 		else

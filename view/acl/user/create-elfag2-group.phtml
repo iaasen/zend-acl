@@ -1,0 +1,46 @@
+<?php
+/**
+ * User: iaase
+ * Date: 03.12.2017
+ * Time: 22.06
+ * @var Acl\Model\Group[] $groups
+ * @var Acl\Model\User $user
+ */
+
+?>
+
+<h1>Ny bruker</h1>
+
+<p>
+	Hei <?= $user->name ?>.<br>
+	Vi ser du har logget inn med konto fra nye Elfag intranett (brukernavn <?= $user->username ?>) for første gang.<br>
+	Ifølge nye intranett heter firmaet ditt: <b><?= $user->ludens_company->name ?></b><br>
+	Kan du hjelpe oss og finne igjen firmaet ditt?<br>
+</p>
+
+
+<form method="post">
+	<div class="form-group">
+		<div class="radio">
+			<label>
+				<input type="radio" name="company" value="new">
+				Nytt firma, dette er første gang jeg logger inn
+			</label>
+		</div>
+		<?php foreach($groups AS $group): ?>
+			<div class="radio">
+				<label>
+					<input type="radio" name="company" value="<?= $group->id ?>">
+					<?= $group->name ?>
+				</label>
+			</div>
+		<?php endforeach; ?>
+		<div class="radio">
+			<label>
+				<input type="radio" name="company" value="missing">
+				Jeg har brukt tjenesten før, men finner ikke firmanavnet mitt i listen her
+			</label>
+		</div>
+		<input type="submit" value="Lagre">
+	</div>
+</form>

@@ -10,20 +10,22 @@ namespace Acl\Service;
 
 
 use Acl\Model\Access;
-use Oppned\AbstractTable;
+use Iaasen\Service\AbstractTable;
 
 class AccessTable extends AbstractTable
 {
 	/**
 	 * @param $userId
 	 * @param $groupId
-	 * @return Access
+	 * @return Access|false
 	 */
 	public function getAccess($userId, $groupId) {
-		return parent::fetchAll([
+		$access =  parent::fetchAll([
 			'users_id' => $userId,
 			'groups_id' => $groupId,
-		])[0];
+		]);
+		if($access && count($access)) return $access[0];
+		return false;
 	}
 
 	/**

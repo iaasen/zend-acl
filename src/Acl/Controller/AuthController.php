@@ -40,8 +40,11 @@ class AuthController extends AbstractActionController {
 //		//$o = $this->getServiceLocator()->get('viewhelpermanager')->get('menu')->mainMenu();
 //		return parent::onDispatch($e);
 //	}
-	
-	
+
+	/**
+	 * @return mixed|\Zend\Authentication\Result|Response|ViewModel
+	 * @throws \Exception
+	 */
 	public function loginAction() {
 		if($this->authService->hasIdentity()) return $this->redirect()->toRoute('home');
 
@@ -73,17 +76,17 @@ class AuthController extends AbstractActionController {
 					}
 
 					$user = $this->userService->getUserByUsername($this->authService->getIdentity());
-					if (!$user) { // Probably elfag2-user and it's the first login
-//						if(filter_var($this->authService->getIdentity(), FILTER_VALIDATE_EMAIL)) {
-//							$this->userService->createElfag2User($this->authService->getIdentity());
-//						}
-						// Create user
-						//return $this->redirect()->toRoute('user/createElfagUser');
-					}
-
+//					if (!$user) { // Probably elfag2-user and it's the first login
+////						if(filter_var($this->authService->getIdentity(), FILTER_VALIDATE_EMAIL)) {
+////							$this->userService->createElfag2User($this->authService->getIdentity());
+////						}
+//						// Create user
+//						//return $this->redirect()->toRoute('user/createElfagUser');
+//					}
 
 					$user->last_login = new \DateTime();
 					$this->userService->saveUser($user);
+
 
 					// Make sure current_group is set
 					if (!$user->current_group) {
@@ -93,9 +96,13 @@ class AuthController extends AbstractActionController {
 							$user->current_group = key($user->access);
 							$this->userService->saveUser($user);
 						} else {
-							$this->redirect()->toRoute('user/noAccess');
+							if($user->logintype == 'elfag2') {
+								return $this->redirect()->toRoute('user/create-elfag2-group');
+							}
+							else $this->redirect()->toRoute('user/noAccess');
 						}
 					}
+
 					// No access to the current current_group
 					if (!isset($user->access[$user->current_group])) {
 						return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
@@ -108,7 +115,6 @@ class AuthController extends AbstractActionController {
 							return $result;
 						}
 					}
-
 					return $this->redirect()->toUrl($redirect);
 				}
 				else {
@@ -122,6 +128,8 @@ class AuthController extends AbstractActionController {
 		]);
 		return $viewModel;
 	}
+
+
 	
 //	public function authenticateAction() {
 //		$form = $this->loginForm;

@@ -60,13 +60,12 @@ class UserTable extends AbstractTable {
 	}
 
 	/**
-	 * @param string $identity
-	 * @throws \Exception
-	 * @return User|false $user
-	 * 
 	 * Give username or id to retrieve user from database.
+	 * @param string $identity
+	 * @return User|false
+	 * @throws \Exception
 	 */
-	public function getUser($identity, $loginType = 'default') {
+	public function getUser($identity) {
 		if(!strlen($identity)) {
 			return false;
 		}
@@ -75,7 +74,7 @@ class UserTable extends AbstractTable {
 			$identity = $rowSet;
 		}
 		else {
-			$rowSet = $this->fetchAll(['username' => $identity, 'logintype' => $loginType]);
+			$rowSet = $this->fetchAll(['username' => $identity]);
 			if(count($rowSet) > 1)
 				throw new \Exception('Multiple users with same username. Something is wrong.');
 				
@@ -89,7 +88,32 @@ class UserTable extends AbstractTable {
 		return $identity;
 	}
 
-	public function getUserByEmail($email) {
+	/**
+	 * @param string $identity
+	 * @param string $loginType
+	 * @return User|false
+	 * @throws \Exception
+	 */
+	public function getUserByIdentityAndLogintype(string $identity, string $loginType) {
+		if(!strlen($identity)) return false;
+		$rowSet = $this->fetchAll(['username' => $identity, 'logintype' => $loginType]);
+		if(count($rowSet) > 1)
+			throw new \Exception('Multiple users with same username. Something is wrong.');
+
+		if(count($rowSet) == 0) {
+			Message::create(3, 'User not found');
+			return false;
+		}
+
+		return $rowSet[0];
+	}
+
+	/**
+	 * @param string $email
+	 * @return User|false
+	 * @throws \Exception
+	 */
+	public function getUserByEmail(string $email) {
 		$rowSet = $this->fetchAll(array('email' => $email));
 		if(count($rowSet) > 1)
 			throw new \Exception('Multiple users with same e-mail. Something is wrong.');
@@ -232,36 +256,9 @@ class UserTable extends AbstractTable {
 	
 	/**
 	 * @deprecated
-	 * @param User $user
-	 * @param string $group
-	 * @return boolean
 	 */
 	public function saveUserAccess(User $user, $group) {
 		throw new \DomainException('Method deprecated. Use UserService::saveUserAccess()');
-//		throw new \DomainException('Function is deprecated. Use UserService::saveUserAccess()');
-//		if($group instanceof Group) $group = $group->group;
-//		if(!$this->accessToSaveAccess($user, $group)) return false;
-//
-//		$access = $user->getAccessLevel($group);
-//		$groupid = $this->groupTable->getGroupId($group);
-//
-//		if($this->find($user->id)) {
-//			$update = new \Zend\Db\Sql\Update();
-//			$update->table('users_has_groups');
-//			$update->where(array (
-//				'users_id' => $user->id,
-//				'groups_id' => $groupid,
-//			));
-//			$update->set(array('access_level' => $access));
-//			//echo $update->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
-//
-//			$sql = new Sql($this->primaryGateway->getAdapter());
-//			$statement = $sql->prepareStatementForSqlObject($update);
-//
-//			$statement->execute();
-//			return true;
-//		}
-//		return false;
 	}
 	
 	public function accessToView($mixed, $object = 'user') {
