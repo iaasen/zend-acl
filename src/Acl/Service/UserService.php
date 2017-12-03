@@ -89,8 +89,8 @@ class UserService
 		return $this->populateUser($user);
 	}
 
-	public function getUserByUsername($username) {
-		$user = $this->userTable->getUser($username);
+	public function getUserByUsername($username, $loginType = 'default') {
+		$user = $this->userTable->getUser($username, $loginType);
 		if(!$user) return false;
 		return $this->populateUser($user);
 	}
@@ -173,8 +173,12 @@ class UserService
 	 * @return bool|int
 	 */
 	public function saveUser($user) {
-		$currentUser = $this->getCurrentUser();
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+		if($trace[1]['class'] == Elfag2Service::class) {
+			return $this->userTable->save($user);
+		}
 
+		$currentUser = $this->getCurrentUser();
 
 		if($user->id) { // Existing user
 			if($user->id != $currentUser->id) return false; // Not same user
@@ -311,4 +315,7 @@ class UserService
 		return true;
 	}
 
+	public function getUserObjectPrototype() {
+		return $this->userTable->getObjectPrototype();
+	}
 }

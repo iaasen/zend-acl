@@ -1,11 +1,16 @@
 <?php
 namespace Acl;
 
+use Acl\Adapter\AuthElfag2Adapter;
+use Acl\Service\Elfag2Service;
 use Zend\Db\TableGateway\TableGateway;
+use Zend\EventManager\Event;
+use Zend\EventManager\EventManager;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\Router\Http\RouteMatch;
+use Zend\ServiceManager\ServiceManager;
 use Zend\Session\SessionManager;
 use Zend\Session\Container;
 use Zend\Session\SaveHandler\DbTableGateway;
@@ -46,6 +51,8 @@ class Module implements AutoloaderProviderInterface {
 		$serviceManager = $e->getApplication()->getServiceManager();
 		$acl = $serviceManager->get('Acl\AuthService');
 		$list = $this->whitelist;
+
+		$this->elfag2UserLoggedInEvent($eventManager, $serviceManager);
 	
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, function(MvcEvent $e) use ($list, $acl) {
 			/** @var \Bugsnag\Client $bugsnag */
@@ -91,6 +98,21 @@ class Module implements AutoloaderProviderInterface {
 			return $response;
 		}, -100);
 
+	}
+
+	/**
+	 * @param EventManager $eventManager
+	 * @param ServiceManager $serviceManager
+	 */
+	protected function elfag2UserLoggedInEvent($eventManager, $serviceManager) {
+		$eventManager->getSharedManager()->attach(
+			AuthElfag2Adapter::class,
+			'user_elfag2_logged_in',
+			function(Event $e) use ($serviceManager) {
+				$elfag2Service = $serviceManager->get(Elfag2Service::class);
+				$elfag2Service->createUserIfNeeded($e->getParam('tokenData'));
+			}
+		);
 	}
 	
 	public function bootstrapSession(MvcEvent $e)

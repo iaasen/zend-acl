@@ -15,6 +15,7 @@ use Iaasen\Model\AbstractModel;
  * @property string $email
  * @property bool $email_confirmed
  * @property int $ludens_id
+ * @property \stdClass $ludens_company
  * @property bool $superuser
  * @property string $current_group
  * @property \DateTime $last_login
@@ -53,6 +54,8 @@ class User extends AbstractModel {
 	protected $email_confirmed;
 	/** @var int */
 	protected $ludens_id;
+	/** @var \stdClass */
+	protected $ludens_company;
 	/** @var bool */
 	protected $superuser;
 	/** @var string */

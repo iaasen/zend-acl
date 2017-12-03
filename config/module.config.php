@@ -23,6 +23,7 @@ return [
 			\Acl\Model\AclStorage::class => \Acl\Model\AclStorageFactory::class,
 			\Acl\Service\AccessTable::class => \Acl\Service\AccessTableFactory::class,
 			\Acl\Service\AuthService::class => \Acl\Service\AuthServiceFactory::class,
+			\Acl\Service\Elfag2Service::class => \Acl\Service\Elfag2ServiceFactory::class,
 			\Acl\Service\Elfag2Transport::class => \Acl\Service\Elfag2TransportFactory::class,
 			\Acl\Service\GroupTable::class => \Acl\Service\GroupTableFactory::class,
 			\Acl\Service\UserService::class => \Acl\Service\UserServiceFactory::class,

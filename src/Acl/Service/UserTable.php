@@ -66,7 +66,7 @@ class UserTable extends AbstractTable {
 	 * 
 	 * Give username or id to retrieve user from database.
 	 */
-	public function getUser($identity) {
+	public function getUser($identity, $loginType = 'default') {
 		if(!strlen($identity)) {
 			return false;
 		}
@@ -75,7 +75,7 @@ class UserTable extends AbstractTable {
 			$identity = $rowSet;
 		}
 		else {
-			$rowSet = $this->fetchAll(array('username' => $identity));
+			$rowSet = $this->fetchAll(['username' => $identity, 'logintype' => $loginType]);
 			if(count($rowSet) > 1)
 				throw new \Exception('Multiple users with same username. Something is wrong.');
 				
@@ -202,11 +202,11 @@ class UserTable extends AbstractTable {
 
 		// Save to database
 		unset($data['id']);
-		unset($data['created']);
+		unset($data['timestamp_created']);
 		
 		$id = (int) $user->id;
 		if ($id == 0) {
-			$data['created'] = date("Y-m-d H:i:s");
+			$data['timestamp_created'] = date("Y-m-d H:i:s");
 			$this->primaryGateway->insert($data);
 			$id = (int) $this->primaryGateway->getLastInsertValue();
 		}
