@@ -73,14 +73,12 @@ class AuthController extends AbstractActionController {
 					}
 
 					$user = $this->userService->getUserByUsername($this->authService->getIdentity());
-
-
 					if (!$user) { // Probably elfag-user and it's the first login
 						return $this->redirect()->toRoute('user/createElfagUser');
 					}
 
 
-					$user->last_login = time();
+					$user->last_login = new \DateTime();
 					$this->userService->saveUser($user);
 
 					// Make sure current_group is set

@@ -1,6 +1,7 @@
 <?php
 
 namespace Acl\Model;
+use Iaasen\Model\AbstractModel;
 
 
 /**
@@ -12,11 +13,13 @@ namespace Acl\Model;
  * @property string $password
  * @property string $name
  * @property string $email
- * @property string $email_confirmed
+ * @property bool $email_confirmed
+ * @property int $ludens_id
  * @property bool $superuser
  * @property string $current_group
+ * @property \DateTime $last_login
  */
-class User {
+class User extends AbstractModel {
 	public static $access_level = array (
 		0 => 'None',
 		1 => 'View',
@@ -33,31 +36,45 @@ class User {
 		'soap' => 'Visma',
 		'token' => 'Application/Website'
 	);
-	protected $data = array (
-		'id' => null,
-		'logintype' => 'default',
-		'username' => null,
-		'password' => null,
-		'name' => null,
-		'email' => null,
-		'email_confirmed' => null,
-		'superuser' => false,
-		'current_group' => null,
-		'created' => null,
-		'last_login' => null 
-	);
+
+	/** @var int */
+	protected $id;
+	/** @var string */
+	protected $logintype;
+	/** @var string */
+	protected $username;
+	/** @var string */
+	protected $password;
+	/** @var string */
+	protected $name;
+	/** @var string */
+	protected $email;
+	/** @var bool */
+	protected $email_confirmed;
+	/** @var int */
+	protected $ludens_id;
+	/** @var bool */
+	protected $superuser;
+	/** @var string */
+	protected $current_group;
+	/** @var \DateTime */
+	protected $last_login;
 
 	/** @var Access[] */
 	public $access = [];
 
-	public function __construct(array $data = null) {
-		$this->created = time();
-		if (! is_null($data)) {
-			foreach($data as $name => $value) {
-				$this->{$name} = $value;
-			}
+	/**
+	 * User constructor.
+	 * @param array $data
+	 * @throws \Exception
+	 */
+	public function __construct(array $data = []) {
+		parent::__construct();
+
+		foreach($data AS $key => $value) {
+			parent::__set($key, $value);
 		}
-		
+
 		//Translation strings
 		_('Local');
 		_('Application/Website');
@@ -110,70 +127,25 @@ class User {
 	
 	public function getValueOptions() {
 		$options = array();
-// 		foreach(self::$access_level AS $key => $value) {
-// 			$options[$key] = array('value' => $key, 'label' => $value);
-// 		}
-		$options[0] = array('value' => 0, 'label' => _('None'));
-		$options[1] = array('value' => 1, 'label' => _('View'));
-		$options[2] = array('value' => 2, 'label' => _('Edit own'));
-		$options[3] = array('value' => 3, 'label' => _('Edit all'));
-		$options[4] = array('value' => 4, 'label' => _('Admin'));
-		$options[5] = array('value' => 5, 'label' => _('Master'));
+		$options[0] = ['value' => 0, 'label' => _('None')];
+		$options[1] = ['value' => 1, 'label' => _('View')];
+		$options[2] = ['value' => 2, 'label' => _('Edit own')];
+		$options[3] = ['value' => 3, 'label' => _('Edit all')];
+		$options[4] = ['value' => 4, 'label' => _('Admin')];
+		$options[5] = ['value' => 5, 'label' => _('Master')];
 		return $options;
-	}
-
-	/**
-	 * Called when object is created from database by TabelGateway?
-	 * Called when form is validated.
-	 */
-	public function exchangeArray($data) {
-		foreach($data as $key => $value) {
-			try {
-				switch ($key) {
-					case 'id' :
-						$this->$key = (int) $value;
-						break;
-					case 'created' :
-					case 'last_login' :
-						$this->$key = strtotime($value);
-						break;
-					case 'superuser' :
-					case 'email_confirmed' :
-						$this->$key = ($value) ? true : false;
-						break;
-					default :
-						$this->$key = ($value) ? $value : null;
-						break;
-				}
-			}
-			catch(\Exception $e) {
-			}
-		}
 	}
 
 	/**
 	 * Called by $form->bind()
 	 *
 	 * @return array $_data Arraycopy of the datafields
+	 * @throws \Exception
 	 */
 	public function getArrayCopy() {
-		$_data = array ();
-		foreach($this->data as $key => $value) {
-			if (strlen($value))
-				switch ($key) {
-					case 'created' :
-					case 'last_login' :
-						$_data[$key] = date("d.m.Y", $value);
-						break;
-					default :
-						$_data[$key] = $value;
-						break;
-				}
-			else {
-				$_data[$key] = null;
-			}
-		}
-		return $_data;
+		$data = parent::getArrayCopy();
+		unset($data['access']);
+		return $data;
 	}
 
 	/**
@@ -182,73 +154,40 @@ class User {
 	 * @return array $_data
 	 */
 	public function databaseSaveArray() {
-		$_data = array ();
-		foreach($this->data as $key => $value) {
-			switch ($key) {
-				case 'created' :
-				case 'last_login' :
-					$_data[$key] = (strlen($value)) ? date("Y-m-d H:i:s", $value) : null;
-					break;
-				case 'superuser' :
-					$_data[$key] = ( bool ) $value;
-					break;
-				default :
-					if (strlen($value))
-						$_data[$key] = $value;
-					else
-						$_data[$key] = null;
-					break;
-			}
-		}
-		return $_data;
+		$data = parent::databaseSaveArray();
+		unset($data['access']);
+		return $data;
 	}
 
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 * @throws \Exception
+	 */
 	public function __set($name, $value) {
 		switch ($name) {
 			case 'id':
-				$this->data[$name] = (int) $value;
-				if($value == 0) $this->data[$name] = null;
+				$this->$name = (int) $value;
+				if($value == 0) $this->$name = null;
 				break;
 			default :
-				if (array_key_exists($name, $this->data)) {
-					$this->data[$name] = (strlen($value)) ? $value : null;
-				}
-				else {
-					throw new \Exception("You cannot set '$name' on " . get_class($this));
-				}
-				break;
+				parent::__set($name, $value);
 		}
 	}
 
 	public function __get($name) {
 		switch ($name) {
 			case 'access' :
-				return $this->_access;
+				return $this->access;
 				break;
 			default :
-				if (array_key_exists($name, $this->data)) {
-					return $this->data[$name];
-				}
+				return parent::__get($name);
 				break;
 		}
-		return false;
-	}
-
-	public function __isset($name) {
-		return isset($this->data[$name]);
-	}
-
-	public function __unset($name) {
-		if (isset($this->data[$name])) {
-			unset($this->data[$name]);
-			return true;
-		}
-		return false;
 	}
 
 	public function __clone() {
-		$this->id = null;
-		$this->created = time();
+		parent::__clone();
 		$this->last_login = null;
 	}
 }

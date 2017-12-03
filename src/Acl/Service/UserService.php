@@ -91,6 +91,7 @@ class UserService
 
 	public function getUserByUsername($username) {
 		$user = $this->userTable->getUser($username);
+		if(!$user) return false;
 		return $this->populateUser($user);
 	}
 

@@ -4,7 +4,7 @@ namespace Acl\Service;
 
 use Acl\Model\Group;
 use Acl\Model\User;
-use Oppned\AbstractTable;
+use Iaasen\Service\AbstractTable;
 use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
 use Oppned\Message;
@@ -27,6 +27,11 @@ class UserTable extends AbstractTable {
 		parent::__construct($currentUser, $primaryGateway);
 	}
 
+	/**
+	 * @param int $id
+	 * @return User|false
+	 * @throws \Exception
+	 */
 	public function find($id) {
 		return $this->getUser((int) $id);
 	}
@@ -143,9 +148,12 @@ class UserTable extends AbstractTable {
 		return $user;
 	}
 
+	/**
+	 * @return int
+	 * @throws \Exception
+	 */
 	public function getUserId() {
 		$user = $this->getUser($this->authService->getIdentity());
-		
 		return $user->id;
 	}
 
