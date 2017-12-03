@@ -30,7 +30,7 @@
 	<br>
 		
 		<?php
-			$form->setAttribute('action', $this->url('auth/authenticate'));
+			//$form->setAttribute('action', $this->url('auth/authenticate'));
 			
 			/*
 			foreach($oform->getElements() AS $element) {
@@ -57,15 +57,7 @@
 		?> 
 	
 	<div>
-		<?php
-		if ($this->messages){
-			echo '<ul>';
-			foreach($this->messages as $message)
-			{
-				echo '<li>'.$message.'</li>';
-			}
-			echo '</ul>';
-		}
-		?>
+
+        <?= $this->flashMessenger()->renderCurrent(); ?>
 	</div>
 </div>

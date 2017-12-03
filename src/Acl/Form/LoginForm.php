@@ -1,57 +1,86 @@
 <?php
 namespace Acl\Form;
 
-//use Zend\Captcha\AdapterInterface as CaptchaAdapter;
-//use Zend\Form\Element;
+use Oppned\Form\Element\Checkbox;
+use Oppned\Form\Element\Submit;
+use Oppned\Form\Element\Text;
+use Zend\Form\Element\Hidden;
+use Zend\Form\Element\Password;
 use Zend\Form\Form;
+use Zend\InputFilter\InputFilterProviderInterface;
+use Zend\Validator\StringLength;
 
-class LoginForm extends Form {
+class LoginForm extends Form implements InputFilterProviderInterface {
 	public function __construct($name = null) {
 		parent::__construct('user');
 		
 		$this->setAttribute('method', 'post');
 		
-		$this->add(array(
+		$this->add([
 			'name' => 'redirect',
-			'type' => 'Hidden',
-		));
+			'type' => Hidden::class,
+		]);
 		
-		$this->add(array(
-			'name'		=> 'username',
-			'options'	=> array(
+		$this->add([
+			'name' => 'username',
+			'type' => Text::class,
+			'options' => [
 				'label'	=> 'Brukernavn',
-			),
-			'attributes' => array(
+			],
+			'attributes' => [
 				'autofocus' => 'autofocus',
-			),
-			'type'		=> 'Text',
-		));
+			],
+		]);
 		
-		$this->add(array(
-			'name'		=> 'password',
-			'options'	=> array(
+		$this->add([
+			'name' => 'password',
+			'type' => Password::class,
+			'options' => [
 				'label' => 'Passord',
-			),
-			'type'		=> 'Password',
-		));
+			],
+		]);
 		
-		$this->add(array(
-			'name'		=> 'rememberMe',
-			'options'	=> array(
+		$this->add([
+			'name' => 'rememberMe',
+			'type' => Checkbox::class,
+			'options' => [
 				'label' => 'Husk meg',
-			),
-			'type'		=> 'Checkbox',
-		));
+			],
+		]);
 
-		$this->add(array(
-			'name'		=> 'submit',
-			'options'	=> array(
+		$this->add([
+			'name' => 'submit',
+			'type' => Submit::class,
+			'options' => [
 				'label' => 'Logg inn',
-			),
-			'attributes'	=> array(
+			],
+			'attributes' => [
 				'value' => 'Logg inn',
-			),
-			'type'		=> 'Submit',
-		));
+			],
+		]);
+	}
+
+
+	/**
+	 * Should return an array specification compatible with
+	 * {@link Zend\InputFilter\Factory::createInputFilter()}.
+	 *
+	 * @return array
+	 */
+	public function getInputFilterSpecification()
+	{
+		return [
+			'password' => [
+				'validators' => [
+					[
+						'name' => StringLength::class,
+						'options' => [
+							'min' => 1,
+						]
+					],
+
+				],
+			],
+		];
 	}
 }
