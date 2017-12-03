@@ -3,7 +3,7 @@
 namespace Acl\Service;
 
 use Acl\Model\Group;
-use Oppned\AbstractTable;
+use Iaasen\Service\AbstractTable;
 use Zend\Db\Sql\Select;
 
 class GroupTable extends AbstractTable {
@@ -20,6 +20,10 @@ class GroupTable extends AbstractTable {
 		return $this->getGroupById((int) $id);
 	}
 
+	/**
+	 * @return Group[]
+	 * @throws \Exception
+	 */
 	public function getAllGroups() {
 		//get the trace
 		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
