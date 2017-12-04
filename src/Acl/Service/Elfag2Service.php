@@ -103,7 +103,7 @@ class Elfag2Service
 		$mail = new MailMessage();
 		$mail->setEncoding("UTF-8");
 		$mail->setFrom('reklamasjon@oppned.com');
-		$mail->addTo('ingvar@aasenit.no');
+		$mail->addTo('support@prosjektkalkulator.no');
 		$mail->setSubject($user->name . ' mangler kobling til ' . $user->ludens_company->name);
 		$mail->setBody(
 			'Bruker:' . PHP_EOL .

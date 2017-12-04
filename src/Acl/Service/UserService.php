@@ -183,7 +183,7 @@ class UserService
 		$groups = $this->groupTable->getAllGroups();
 		$matchedGroups = [];
 		foreach($groups AS $group) {
-			if(levenshtein($group->name, $name) < 3) $matchedGroups[] = $group;
+			if(levenshtein($group->name, $name) < 5) $matchedGroups[] = $group;
 		}
 		return $matchedGroups;
 	}
