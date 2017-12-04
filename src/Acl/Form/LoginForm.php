@@ -25,7 +25,7 @@ class LoginForm extends Form implements InputFilterProviderInterface {
 			'name' => 'username',
 			'type' => Text::class,
 			'options' => [
-				'label'	=> 'Brukernavn',
+				'label'	=> 'Brukernavn/E-post',
 			],
 			'attributes' => [
 				'autofocus' => 'autofocus',
