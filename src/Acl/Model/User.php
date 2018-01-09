@@ -15,6 +15,7 @@ use Iaasen\Model\AbstractModel;
  * @property string $email
  * @property bool $email_confirmed
  * @property int $ludens_id
+ * @property int $ludens_permissions
  * @property \stdClass $ludens_company
  * @property bool $superuser
  * @property string $current_group
@@ -54,6 +55,8 @@ class User extends AbstractModel {
 	protected $email_confirmed;
 	/** @var int */
 	protected $ludens_id;
+	/** @var int */
+	protected $ludens_permissions;
 	/** @var \stdClass */
 	protected $ludens_company;
 	/** @var bool */

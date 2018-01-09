@@ -2,6 +2,7 @@
 
 namespace Acl\Controller;
 
+use Acl\Adapter\AuthLocalAdapter;
 use Acl\Service\Elfag2Service;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Controller\AbstractActionController;
@@ -148,6 +149,7 @@ class UserController extends AbstractActionController {
 					}
 					else { // local
 						if($form->get('new_password')->getValue() == $form->get('new_password_confirm')->getValue()) {
+							/** @var AuthLocalAdapter $authAdapter */
 							$authAdapter = $this->getServiceLocator()->get('Acl\AuthLocalAdapter');
 							$authAdapter->setIdentity($user->username);
 							$authAdapter->setCredential($form->get('old_password')->getValue());
@@ -453,6 +455,10 @@ class UserController extends AbstractActionController {
 			'user' => $currentUser,
 			'groups' => $groups,
 		];
+	}
+
+	public function noAccessAction() {
+
 	}
 	
 //	public function getTable($table) {

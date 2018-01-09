@@ -245,6 +245,15 @@ return [
 							]
 						]
 					],
+					'noAccess' => [
+						'type' => \Zend\Router\Http\Literal::class,
+						'options' => [
+							'route' => '/ingen-tilgang',
+							'defaults' => [
+								'action' => 'noAccess'
+							]
+						]
+					],
 					'selectGroup' => [
 						'type' => 'literal',
 						'options' => [
@@ -253,7 +262,7 @@ return [
 								'action' => 'selectGroup',
 							]
 						]
-					]
+					],
 				],
 			],
 		],

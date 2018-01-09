@@ -1,6 +1,7 @@
 <?php
 namespace Acl\Controller;
 
+use Acl\Service\Elfag2Service;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
@@ -22,18 +23,22 @@ class AuthController extends AbstractActionController {
 	protected $userTable;
 	/** @var  \Acl\Model\AclStorage */
 	protected $sessionStorage;
+	/** @var Elfag2Service */
+	protected $elfag2Service;
+
 	/** @var  FlashMessenger */
 	protected $flashMessenger;
-	
+
 	protected $tables;
 
-	public function __construct($authService, $loginForm, $userService, $userTable, $sessionStorage)
+	public function __construct($authService, $loginForm, $userService, $userTable, $sessionStorage, $elfag2Service)
 	{
 		$this->authService = $authService;
 		$this->loginForm = $loginForm;
 		$this->userService = $userService;
 		$this->userTable = $userTable;
 		$this->sessionStorage = $sessionStorage;
+		$this->elfag2Service = $elfag2Service;
 	}
 
 //	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
@@ -87,7 +92,11 @@ class AuthController extends AbstractActionController {
 					$user->last_login = new \DateTime();
 					$this->userService->saveUser($user);
 
-
+					// Update access to elfag2 user
+					if($user->logintype == 'elfag2') {
+						$access = $this->elfag2Service->connectUserToGroup($user);
+						if(!$access) return $this->redirect()->toRoute('user/noAccess');
+					}
 					// Make sure current_group is set
 					if (!$user->current_group) {
 						if (count($user->access) > 1) {
@@ -122,6 +131,7 @@ class AuthController extends AbstractActionController {
 				}
 			}
 		}
+
 
 		$viewModel = new ViewModel([
 			'form'		=> $form,

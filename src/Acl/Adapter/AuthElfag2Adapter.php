@@ -11,13 +11,12 @@ namespace Acl\Adapter;
 
 use GuzzleHttp\Exception\ClientException;
 use Iaasen\Transport\HttpTransportInterface;
-use Zend\Authentication\Adapter\AbstractAdapter;
 use Zend\Authentication\Result;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerInterface;
 
-class AuthElfag2Adapter extends AbstractAdapter implements EventManagerAwareInterface
+class AuthElfag2Adapter extends AbstractAuthAdapter implements EventManagerAwareInterface
 {
 
 	protected $httpTransport;
@@ -40,8 +39,14 @@ class AuthElfag2Adapter extends AbstractAdapter implements EventManagerAwareInte
 			$tokenData = $this->httpTransport->sendPostWithJson('token', ['username' => $this->identity, 'password' => $this->credential]);
 			$tokenData = \GuzzleHttp\json_decode($tokenData);
 			if(strlen($tokenData->token)) {
-				$this->getEventManager()->trigger('user_elfag2_logged_in', get_class($this), ["tokenData" => $tokenData]);
-				return new Result(Result::SUCCESS, $tokenData->user_email);
+				if($tokenData->permissions > 0) {
+					$this->getEventManager()->trigger('user_elfag2_logged_in', get_class($this), ["tokenData" => $tokenData]);
+					return new Result(Result::SUCCESS, $tokenData->user_email);
+				}
+				else {
+					$this->getFlashMessenger()->addMessage("Du må ha tilgangen 'admin' eller 'installatør' for å få tilgang til denne tjenesten");
+					return new Result(Result::FAILURE_UNCATEGORIZED, $tokenData->user_email);
+				}
 			}
 			else return new Result(Result::FAILURE, null);
 		}

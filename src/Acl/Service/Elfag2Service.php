@@ -42,14 +42,15 @@ class Elfag2Service
 			$user->exchangeArray([
 				'logintype' => 'elfag2',
 				'username' => $tokenData->user_email,
-				'name' => $tokenData->user_display_name,
 				'email' => $tokenData->user_email,
 				'email_confirmed' => true,
-				'ludens_id' => $tokenData->user_id,
-
 			]);
-			//$user = $this->userService->getUserByUsername($user->username, 'elfag2');
 		}
+		$user->exchangeArray([
+			'name' => $tokenData->user_display_name,
+			'ludens_id' => $tokenData->user_id,
+			'ludens_permissions' => $tokenData->permissions,
+		]);
 		$user->ludens_company = $tokenData->company;
 		$this->userService->saveUser($user);
 	}
@@ -57,12 +58,15 @@ class Elfag2Service
 	/**
 	 * @param User $user
 	 * @param Group $group
+	 * @return bool
 	 * @throws \Exception
 	 */
-	public function connectUserToGroup(User $user, Group $group) {
+	public function connectUserToGroup(User $user, ?Group $group = null) {
+		if(!$group) $group = $this->groupTable->getGroupByLudensId($user->ludens_company->id);
+
 		// Give access
 		$this->userService->addUserToGroup($user, $group);
-		$user->setAccessLevel($group, 5);
+		$user->setAccessLevel($group, ($user->ludens_permissions) ? 3 : 0);
 		$this->userService->saveUserAccess($user, $group);
 
 		// Update user
@@ -72,6 +76,8 @@ class Elfag2Service
 		// Update group
 		$group->ludens_id = $user->ludens_company->id;
 		$this->groupTable->save($group);
+
+		return (bool) $user->ludens_permissions;
 	}
 
 	/**

@@ -60,6 +60,16 @@ class GroupTable extends AbstractTable {
 			return false;
 		return $rowSet[0];
 	}
+
+	/**
+	 * @param $id
+	 * @return Group|false
+	 */
+	public function getGroupByLudensId($id) {
+		$rowSet = $this->fetchAll(['ludens_id' => $id]);
+		if(count($rowSet)) return $rowSet[0];
+		else return false;
+	}
 	
 	/**
 	 * 

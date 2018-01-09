@@ -9,10 +9,7 @@ namespace Acl\Controller;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Zend\Mvc\Controller\ControllerManager;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 class AuthControllerFactory implements FactoryInterface
@@ -33,10 +30,8 @@ class AuthControllerFactory implements FactoryInterface
 	 * @param  string $requestedName
 	 * @param  null|array $options
 	 * @return object
-	 * @throws ServiceNotFoundException if unable to resolve the service.
-	 * @throws ServiceNotCreatedException if an exception is raised when
-	 *     creating a service.
-	 * @throws ContainerException if any other error occurs
+	 * @throws \Psr\Container\ContainerExceptionInterface
+	 * @throws \Psr\Container\NotFoundExceptionInterface
 	 */
 	public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
 	{
@@ -47,7 +42,16 @@ class AuthControllerFactory implements FactoryInterface
 		$userTable = $container->get(\Acl\Service\UserTable::class);
 		$userService = $container->get(\Acl\Service\UserService::class);
 		$sessionStorage = $container->get(\Acl\Model\AclStorage::class);
-		return new AuthController($authService, $loginForm, $userService, $userTable, $sessionStorage);
+		$elfag2Service = $container->get(\Acl\Service\Elfag2Service::class);
+
+		return new AuthController(
+			$authService,
+			$loginForm,
+			$userService,
+			$userTable,
+			$sessionStorage,
+			$elfag2Service
+		);
 
 	}
 }
