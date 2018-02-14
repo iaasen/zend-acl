@@ -322,4 +322,16 @@ return [
 			],
 		],
 	],
+	'mail_transport' => [
+		'name' => '',
+		'host' => '',
+		'port' => 587,
+		'connection_class'  => 'login',
+		'connection_config' => [
+			'username' => '',
+			'password' => '',
+			'ssl'      => 'tls',
+		],
+	],
+
 ];
