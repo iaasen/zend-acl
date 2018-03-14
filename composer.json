@@ -2,6 +2,7 @@
   "name": "iaasen/zend-acl",
   "description": "Zend authentication implementation",
   "type": "library",
+  "license": "proprietary",
   "authors": [
     {
       "name": "Ingvar Aasen",
