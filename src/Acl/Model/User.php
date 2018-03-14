@@ -172,6 +172,11 @@ class User extends AbstractModel {
 	 */
 	public function __set($name, $value) {
 		switch ($name) {
+			case 'old_password':
+			case 'new_password':
+			case 'new_password_confirm':
+			case 'submit';
+				break;
 			case 'id':
 				$this->$name = (int) $value;
 				if($value == 0) $this->$name = null;

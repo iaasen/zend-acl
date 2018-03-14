@@ -33,8 +33,9 @@ class UserControllerFactory implements FactoryInterface
 		$userService = $container->get(\Acl\Service\UserService::class);
 		$elfag2Service = $container->get(\Acl\Service\Elfag2Service::class);
 		$currentUser = $userService->getCurrentUser();
+		$authLocalAdapter = $container->get(\Acl\Adapter\AuthLocalAdapter::class);
 
-		return new UserController($currentUser, $userTable, $groupTable, $userService, $elfag2Service);
+		return new UserController($currentUser, $userTable, $groupTable, $userService, $elfag2Service, $authLocalAdapter);
 
 	}
 }

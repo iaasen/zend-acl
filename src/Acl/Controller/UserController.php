@@ -36,14 +36,17 @@ class UserController extends AbstractActionController {
 	protected $userService;
 	/** @var Elfag2Service */
 	protected $elfag2Service;
+	/** @var AuthLocalAdapter */
+	protected $authLocalAdapter;
 
-	public function __construct($currentUser, $userTable, $groupTable, $userService, $elfag2Service)
+	public function __construct($currentUser, $userTable, $groupTable, $userService, $elfag2Service, $authLocalAdapter)
 	{
 		$this->currentUser = $currentUser;
 		$this->userTable = $userTable;
 		$this->groupTable = $groupTable;
 		$this->userService = $userService;
 		$this->elfag2Service = $elfag2Service;
+		$this->authLocalAdapter = $authLocalAdapter;
 	}
 
 //	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
@@ -77,7 +80,7 @@ class UserController extends AbstractActionController {
 				$form = new EditSoapUserForm($user);
 				break;
 			default:
-				$form = new EditUserForm($user, $group);
+				$form = new EditUserForm($user);
 				break;
 		}
 		$form->bind($user);
@@ -149,11 +152,9 @@ class UserController extends AbstractActionController {
 					}
 					else { // local
 						if($form->get('new_password')->getValue() == $form->get('new_password_confirm')->getValue()) {
-							/** @var AuthLocalAdapter $authAdapter */
-							$authAdapter = $this->getServiceLocator()->get('Acl\AuthLocalAdapter');
-							$authAdapter->setIdentity($user->username);
-							$authAdapter->setCredential($form->get('old_password')->getValue());
-							if($authAdapter->authenticate()->isValid()) {
+							$this->authLocalAdapter->setIdentity($user->username);
+							$this->authLocalAdapter->setCredential($form->get('old_password')->getValue());
+							if($this->authLocalAdapter->authenticate()->isValid()) {
 								$typingConfirmed = true;
 							}
 							else {
@@ -184,7 +185,6 @@ class UserController extends AbstractActionController {
 					strlen($form->get('access_level')->getValue()) &&
 					$form->get('access_level')->getValue() != $user->getAccessLevel($group->group)
 				) {
-
 					$user->setAccessLevel($group, $form->get('access_level')->getValue());
 					$this->userService->saveUserAccess($user, $group);
 				}
@@ -382,7 +382,7 @@ class UserController extends AbstractActionController {
 	}
 
 	/**
-	 * @return array
+	 * @return array|\Zend\Http\Response
 	 * @throws \Exception
 	 */
 	public function createElfag2GroupAction() {

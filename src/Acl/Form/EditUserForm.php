@@ -2,86 +2,91 @@
 
 namespace Acl\Form;
 
+use Priceestimator\Form\Element\Submit;
+use Priceestimator\Form\Element\Text;
+use Zend\Filter\StringTrim;
+use Zend\Filter\StripTags;
+use Zend\Filter\ToInt;
+use Zend\Form\Element\Hidden;
+use Zend\Form\Element\Password;
+use Zend\Form\Element\Select;
 use Zend\Form\Form;
 use Zend\Hydrator\ArraySerializable;
 use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\Stdlib\Hydrator\ArraySerializable as ArrayHydrator;
 use Zend\InputFilter\InputFilter;
 use Acl\Model\User;
+use Zend\Validator\Identical;
+use Zend\Validator\StringLength;
 
 class EditUserForm extends Form implements InputFilterProviderInterface {
 
-	public function __construct($user) {
+	public function __construct(User $user) {
 		// we want to ignore the name passed
 		parent::__construct('useredit');
 		$this->setAttribute('method', 'post');
-		$this->setAttribute('autocomplete', 'off');
+		//$this->setAttribute('autocomplete', 'off');
 		$this->setHydrator(new ArraySerializable());
 		$this->setInputFilter(new InputFilter());
 		$this->setObject(new User());
 		
-		$this->add(array (
+		$this->add([
 			'name' => 'id',
-			'type' => 'Hidden'
-		));
-		$this->add(array (
+			'type' => Hidden::class
+		]);
+		$this->add([
 			'name' => 'username', // Slash to avoid Firefox autofilling password
-			'type' => 'Text',
-			'options' => array (
+			'type' => Text::class,
+			'options' => [
 				'label' => 'Brukernavn'
-			) 
-		));
-		$this->add(array (
+			]
+		]);
+		$this->add([
 			'name' => 'name',
-			'type' => 'Text',
-			'attributes' => array (
+			'type' => Text::class,
+			'attributes' => [
 				'autofocus' => 'autofocus'
-			),
-			'options' => array (
+			],
+			'options' => [
 				'label' => 'Navn'
-			) 
-		));
-		$this->add(array (
+			]
+		]);
+
+		$this->add([
 			'name' => 'old_password',
-			'type' => 'Password',
-// 			'attributes' => array(
-// 				'placeholder' => ($user->password) ? 'Skriv nytt passord her' : ''
-// 			),
-			'options' => array (
+			'type' => Password::class,
+			'options' => [
 				'label' => 'Gammelt passord',
-			),
-		));
-		$this->add(array (
+			],
+		]);
+
+		$this->add([
 			'name' => 'new_password',
-			'type' => 'Password',
-// 			'attributes' => array(
-// 				'placeholder' => ($user->password) ? 'Skriv nytt passord her' : ''
-// 			),
-			'options' => array (
+			'type' => Password::class,
+			'options' => [
 				'label' => 'Nytt passord',
-			),
-		));
-		$this->add(array (
+			],
+		]);
+
+		$this->add([
 			'name' => 'new_password_confirm',
-			'type' => 'Password',
-// 			'attributes' => array(
-// 				'placeholder' => ($user->password) ? 'Bekreft nytt passord her' : ''
-// 			),
-			'options' => array (
+			'type' => Password::class,
+			'options' => [
 				'label' => 'Bekreft nytt passord',
-			),
-		));
-		$this->add(array (
+			],
+		]);
+
+		$this->add([
 			'name' => 'email',
-			'type' => 'Text',
-			'options' => array (
+			'type' => Text::class,
+			'options' => [
 				'label' => 'E-post'
-			) 
-		));
-		$this->add(array (
+			]
+		]);
+
+		$this->add([
 			'name' => 'access_level',
-			'type' => 'Select',
-			'options' => array (
+			'type' => Select::class,
+			'options' => [
 				'label' => 'Tilgangsnivå',
 				'value_options' => $user->getValueOptions(),
 // 				'value_options' => array(
@@ -92,145 +97,120 @@ class EditUserForm extends Form implements InputFilterProviderInterface {
 // 					array('value' => 4, 'label' => 'Administrator'),
 // 					array('value' => 5, 'label' => 'Superbruker')
 // 				)
-			)
-		));
+			]
+		]);
 		
-		$this->add(array (
+		$this->add([
 				'name' => 'submit',
-				'type' => 'Submit',
-				'attributes' => array (
+				'type' => Submit::class,
+				'attributes' => [
 						'value' => 'Lagre',
 						'id' => 'submitbutton'
-				),
-				'options' => array(
+				],
+				'options' => [
 						'label' => 'Lagre',
-				),
-		));
+				],
+		]);
 	}
 
 	public function getInputFilterSpecification() {
-		return array (
-			'id' => array (
+		return [
+			'id' => [
 				'required' => false,
-				'filters' => array (
-					array (
-						'name' => 'Int' 
-					) 
-				) 
-			),
-			'username' => array (
+				'filters' => [
+					['name' => ToInt::class]
+				]
+			],
+			'username' => [
 				'required' => false,
-				'filters' => array (
-					array (
-						'name' => 'StripTags' 
-					),
-					array (
-						'name' => 'StringTrim' 
-					) 
-				),
-				'validators' => array (
-					array (
-						'name' => 'StringLength',
-						'options' => array (
-							'encoding' => 'UTF-8',
+				'filters' => [
+					['name' => StripTags::class],
+					['name' => StringTrim::class],
+				],
+				'validators' => [
+					[
+						'name' => StringLength::class,
+						'options' => [
 							'min' => 1,
-							'max' => 100 
-						) 
-					) 
-				) 
-			),
-			'new_password' => array (
+							'max' => 100
+						]
+					]
+				]
+			],
+			'new_password' => [
 				'required' => false,
-				'filters' => array (
-					array (
-						'name' => 'StringTrim' 
-					) 
-				),
-				'validators' => array (
-					array (
-						'name' => 'StringLength',
-						'options' => array (
-							'encoding' => 'UTF-8',
+				'filters' => [
+					['name' => StringTrim::class]
+				],
+				'validators' => [
+					[
+						'name' => StringLength::class,
+						'options' => [
 							'min' => 1,
-							'max' => 100 
-						) 
-					) 
-				) 
-			),
-			'new_password_confirm' => array (
+							'max' => 100
+						]
+					]
+				]
+			],
+			'new_password_confirm' => [
 				'required' => false,
-				'filters' => array (
-					array (
-						'name' => 'StringTrim' 
-					) 
-				),
-				'validators' => array (
-					array (
-						'name' => 'Identical',
-						'options' => array(
+				'filters' => [
+					['name' => StringTrim::class]
+				],
+				'validators' => [
+					[
+						'name' => Identical::class,
+						'options' => [
 							'token' => 'new_password'
-						)
-					),
-					array (
-						'name' => 'StringLength',
-						'options' => array (
-							'encoding' => 'UTF-8',
+						]
+					],
+					[
+						'name' => StringLength::class,
+						'options' => [
 							'min' => 1,
-							'max' => 100 
-						) 
-					) 
-				) 
-			),
-			'name' => array (
+							'max' => 100
+						]
+					]
+				]
+			],
+			'name' => [
 				'required' => false,
-				'filters' => array (
-					array (
-						'name' => 'StripTags' 
-					),
-					array (
-						'name' => 'StringTrim' 
-					) 
-				),
-				'validators' => array (
-					array (
-						'name' => 'StringLength',
-						'options' => array (
-							'encoding' => 'UTF-8',
+				'filters' => [
+					['name' => StripTags::class],
+					['name' => StringTrim::class]
+				],
+				'validators' => [
+					[
+						'name' => StringLength::class,
+						'options' => [
 							'min' => 1,
-							'max' => 100 
-						) 
-					) 
-				) 
-			),
-			'email' => array (
+							'max' => 100
+						]
+					]
+				]
+			],
+			'email' => [
 				'required' => false,
-				'filters' => array (
-					array (
-						'name' => 'StripTags' 
-					),
-					array (
-						'name' => 'StringTrim' 
-					) 
-				),
-				'validators' => array (
-					array (
-						'name' => 'StringLength',
-						'options' => array (
-							'encoding' => 'UTF-8',
+				'filters' => [
+					['name' => StripTags::class],
+					['name' => StringTrim::class]
+				],
+				'validators' => [
+					[
+						'name' => StringLength::class,
+						'options' => [
 							'min' => 1,
-							'max' => 100 
-						) 
-					) 
-				) 
-			),
-			'access_level' => array (
+							'max' => 100
+						]
+					]
+				]
+			],
+			'access_level' => [
 				'required' => false,
-				'filters' => array (
-					array (
-						'name' => 'Int'
-					)
-				)
-			),
-		);
+				'filters' => [
+					['name' => ToInt::class]
+				]
+			],
+		];
 	}
 }
