@@ -44,7 +44,7 @@ class AuthElfag2Adapter extends AbstractAuthAdapter implements EventManagerAware
 					return new Result(Result::SUCCESS, $tokenData->user_email);
 				}
 				else {
-					$this->getFlashMessenger()->addMessage("Du må ha tilgangen 'admin' eller 'installatør' for å få tilgang til denne tjenesten");
+					$this->getFlashMessenger()->addMessage("Du må ha tilgangen 'admin' eller 'installatør' for å få tilgang til denne tjenesten", 'error');
 					return new Result(Result::FAILURE_UNCATEGORIZED, $tokenData->user_email);
 				}
 			}
@@ -56,7 +56,7 @@ class AuthElfag2Adapter extends AbstractAuthAdapter implements EventManagerAware
 			elseif($response->code == '[jwt_auth] empty_password') return new Result(Result::FAILURE_CREDENTIAL_INVALID, null);
 			elseif($response->code == '[jwt_auth] invalid_email') return new Result(Result::FAILURE_IDENTITY_NOT_FOUND, null);
 			elseif($response->code == '[jwt_auth] invalid_username') return new Result(Result::FAILURE_IDENTITY_NOT_FOUND, null);
-			else return new Result(Result::FAILURE_UNCATEGORIZED, null);
+			else return new Result(Result::FAILURE, null);
 		}
 	}
 

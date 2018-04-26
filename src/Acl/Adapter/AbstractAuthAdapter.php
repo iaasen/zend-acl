@@ -9,19 +9,20 @@
 namespace Acl\Adapter;
 
 
+use Iaasen\Messenger\SessionMessenger;
 use Zend\Authentication\Adapter\AbstractAdapter;
-use Zend\Mvc\Plugin\FlashMessenger\FlashMessenger;
+
 
 abstract class AbstractAuthAdapter extends AbstractAdapter
 {
-	/** @var  FlashMessenger */
+	/** @var  SessionMessenger */
 	protected $flashMessenger;
 
 	/**
-	 * @return FlashMessenger
+	 * @return SessionMessenger
 	 */
 	protected function getFlashMessenger() {
-		if(!$this->flashMessenger) $this->flashMessenger = new FlashMessenger();
+		if(!$this->flashMessenger) $this->flashMessenger = new SessionMessenger();
 		return $this->flashMessenger;
 	}
 }

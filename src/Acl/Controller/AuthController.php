@@ -2,10 +2,10 @@
 namespace Acl\Controller;
 
 use Acl\Service\Elfag2Service;
+use Iaasen\Messenger\SessionMessenger;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
-use Zend\Mvc\Plugin\FlashMessenger\FlashMessenger;
 use Zend\View\Model\ViewModel;
 use Zend\Crypt\Password\Bcrypt;
 
@@ -25,9 +25,6 @@ class AuthController extends AbstractActionController {
 	protected $sessionStorage;
 	/** @var Elfag2Service */
 	protected $elfag2Service;
-
-	/** @var  FlashMessenger */
-	protected $flashMessenger;
 
 	protected $tables;
 
@@ -72,7 +69,7 @@ class AuthController extends AbstractActionController {
 				$result = $this->authService->authenticate();
 
 				if($result->isValid()) {
-					$this->getFlashMessenger()->addMessage('Logget inn som "' . $result->getIdentity() . '"');
+					$this->getFlashMessenger()->addSuccessMessage('Logget inn som "' . $result->getIdentity() . '"');
 					//$redirect = $this->url()->fromRoute('home');
 
 					if ($request->getPost('rememberMe') == 1) {
@@ -127,7 +124,7 @@ class AuthController extends AbstractActionController {
 					return $this->redirect()->toUrl($redirect);
 				}
 				else {
-					$this->getFlashMessenger()->addMessage('Feil brukernavn eller passord');
+					$this->getFlashMessenger()->addErrorMessage('Feil brukernavn eller passord');
 				}
 			}
 		}
@@ -248,11 +245,10 @@ class AuthController extends AbstractActionController {
 	}
 
 	/**
-	 * @return FlashMessenger
+	 * @return SessionMessenger
 	 */
-	protected function getFlashMessenger() {
-		if(!$this->flashMessenger) $this->flashMessenger = new FlashMessenger();
-		return $this->flashMessenger;
+	protected function getFlashMessenger() : SessionMessenger {
+		return $this->flashMessenger();
 	}
-	
+
 }
