@@ -39,6 +39,9 @@ return [
 			'UserTable' => \Acl\Service\UserTable::class,
 			\Zend\Authentication\AuthenticationService::class => \Acl\Service\AuthService::class,
 		],
+		'initializers' => [
+			\Acl\Initializer\CurrentUserInitializer::class,
+		],
 	],
 	'controllers' => [
 		'invokables' => [
@@ -47,6 +50,9 @@ return [
 			AuthController::class => \Acl\Controller\AuthControllerFactory::class,
 			UserController::class => \Acl\Controller\UserControllerFactory::class,
 		],
+		'initializers' => [
+			\Acl\Initializer\CurrentUserInitializer::class,
+		]
 	],
 	'view_helpers' => [
 		'aliases' => [

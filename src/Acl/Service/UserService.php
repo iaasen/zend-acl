@@ -10,6 +10,7 @@ namespace Acl\Service;
 
 
 use Acl\Model\Access;
+use Acl\Model\CurrentUser;
 use Acl\Model\Group;
 use Acl\Model\User;
 use Zend\Http\PhpEnvironment\Request;
@@ -28,7 +29,7 @@ class UserService
 	/** @var  Request */
 	protected $request;
 
-	/** @var  \Acl\Model\User */
+	/** @var  \Acl\Model\CurrentUser */
 	protected static $currentUser;
 	/** @var  string */
 	protected static $currentIdentity;
@@ -53,34 +54,40 @@ class UserService
 		return self::$currentGroup;
 	}
 
-	public function getCurrentUser() {
+	public function getCurrentUser() : CurrentUser {
 		// Console user
 		if($this->request instanceof \Zend\Console\Request) {
-			$user = new User();
-			$user->username = 'console';
-			$user->logintype = 'console';
-			self::$currentUser = &$user;
-			self::$currentIdentity = 'console';
-			return self::$currentUser;
-		}
+			if(self::$currentIdentity == 'console') return self::$currentUser;
 
-		$identity = $this->authService->getIdentity();
-		if($identity == self::$currentIdentity) {
-			return self::$currentUser;
+			$currentUser = new CurrentUser();
+			$currentUser->username = 'console';
+			$currentUser->logintype = 'console';
+			$identity = 'console';
 		}
-
-		$user = $this->getUserByUsername($identity);
-		if(!$user) {
-			$user = new User();
-			$user->username = $identity;
-			if(substr($identity, 0, 6) == 'elfag-') {
-				$user->logintype = 'elfag';
-				$user->setAccessLevel($identity, 5);
+		else {
+			$identity = $this->authService->getIdentity();
+			if($identity && $identity == self::$currentIdentity) {
+				return self::$currentUser;
 			}
-		}
-		self::$currentUser = &$user;
-		self::$currentIdentity = &$identity;
 
+			$user = $this->getUserByUsername($identity);
+			if($user) {
+				$currentUser = new CurrentUser($user->databaseSaveArray());
+				$currentUser = $this->populateUser($currentUser);
+			}
+			else {
+				$currentUser = new CurrentUser();
+				$currentUser->username = $identity;
+				if(substr($identity, 0, 6) == 'elfag-') {
+					$currentUser->logintype = 'elfag';
+					$currentUser->setAccessLevel($identity, 5);
+				}
+			}
+
+		}
+
+		self::$currentUser = &$currentUser;
+		self::$currentIdentity = $identity;
 		return self::$currentUser;
 	}
 
@@ -105,7 +112,7 @@ class UserService
 	 * @param User $user
 	 * @return User
 	 */
-	protected function populateUser($user) {
+	protected function populateUser(User $user) {
 		$accesses = $this->accessTable->getAccessesByUserId($user->id);
 		foreach($accesses AS $access) {
 			$group = $this->groupTable->getGroupById($access->groups_id);
