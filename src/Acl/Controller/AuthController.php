@@ -1,17 +1,20 @@
 <?php
 namespace Acl\Controller;
 
+use Acl\Form\LoginForm;
+use Acl\Model\AclStorage;
+use Acl\Service\AuthService;
 use Acl\Service\Elfag2Service;
+use Acl\Service\UserService;
+use Acl\Service\UserTable;
+use Iaasen\Controller\AbstractController;
 use Iaasen\Messenger\SessionMessenger;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Http\Response;
-use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Crypt\Password\Bcrypt;
 
-class AuthController extends AbstractActionController {
-	protected $form;
-	protected $storage;
+class AuthController extends AbstractController {
 
 	/** @var  \Acl\Service\AuthService */
 	protected $authService;
@@ -26,9 +29,13 @@ class AuthController extends AbstractActionController {
 	/** @var Elfag2Service */
 	protected $elfag2Service;
 
-	protected $tables;
-
-	public function __construct($authService, $loginForm, $userService, $userTable, $sessionStorage, $elfag2Service)
+	public function __construct(
+		AuthService $authService,
+		LoginForm $loginForm,
+		UserService $userService,
+		UserTable $userTable,
+		AclStorage $sessionStorage,
+		Elfag2Service $elfag2Service)
 	{
 		$this->authService = $authService;
 		$this->loginForm = $loginForm;
@@ -38,24 +45,19 @@ class AuthController extends AbstractActionController {
 		$this->elfag2Service = $elfag2Service;
 	}
 
-//	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-//		//$o = $this->getServiceLocator()->get('viewhelpermanager')->get('menu')->mainMenu();
-//		return parent::onDispatch($e);
-//	}
 
 	/**
 	 * @return mixed|\Zend\Authentication\Result|Response|ViewModel
 	 * @throws \Exception
 	 */
 	public function loginAction() {
-		if($this->authService->hasIdentity()) return $this->redirect()->toRoute('home');
+		$redirect = $this->getRedirect($this->url()->fromRoute('home'));
+		if(strpos($redirect, '/auth/login') !== false) $redirect = $this->url()->fromRoute('home');
 
-		$redirect = $this->params()->fromPost('redirect', $this->params()->fromQuery('redirect'));
-		//if(!$redirect) $redirect = $this->url()->fromRoute('auth/login');
-		if(!$redirect) $redirect = $this->url()->fromRoute('home');
+		if($this->authService->hasIdentity()) return $this->redirect()->toUrl($redirect);
 
 		$form = $this->loginForm;
-		$form->get('redirect')->setValue($redirect);
+		//$form->get('redirect')->setValue($redirect);
 
 		/** @var Request $request */
 		$request = $this->getRequest();
@@ -70,7 +72,6 @@ class AuthController extends AbstractActionController {
 
 				if($result->isValid()) {
 					$this->getFlashMessenger()->addSuccessMessage('Logget inn som "' . $result->getIdentity() . '"');
-					//$redirect = $this->url()->fromRoute('home');
 
 					if ($request->getPost('rememberMe') == 1) {
 						$this->sessionStorage->setRememberMe(1);
@@ -91,11 +92,11 @@ class AuthController extends AbstractActionController {
 
 					// Update access to elfag2 user
 					if($user->logintype == 'elfag2') {
-						$access = $this->elfag2Service->connectUserToGroup($user);
-						if(!$access) return $this->redirect()->toRoute('user/noAccess');
+						$this->elfag2Service->connectUserToGroup($user);
+						if(!$user->ludens_permissions) return $this->redirect()->toRoute('user/noAccess');
 					}
 					// Make sure current_group is set
-					if (!$user->current_group) {
+					if (!$user->current_group || $user->getAccessLevel() < 1) {
 						if (count($user->access) > 1) {
 							return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
 						} elseif (count($user->access) == 1) {
@@ -226,8 +227,8 @@ class AuthController extends AbstractActionController {
 		}
 		
 		return [
-			'hash' => (isset($hash)) ? $hash : null,
-			'time' => (isset($time)) ? $time : null,
+			'hash' => $hash ?? null,
+			'time' => $time ?? null,
 			'cost' => $cost
 		];
 	}

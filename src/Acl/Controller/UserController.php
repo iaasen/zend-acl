@@ -4,6 +4,7 @@ namespace Acl\Controller;
 
 use Acl\Adapter\AuthLocalAdapter;
 use Acl\Service\Elfag2Service;
+use Iaasen\Exception\NotFoundException;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
@@ -388,7 +389,14 @@ class UserController extends AbstractActionController {
 	public function createElfag2GroupAction() {
 		$user = $this->currentUser;
 
-		$groups = $this->userService->getGroupsMatchingCompanyName($user->ludens_company->name);
+		//$groups = $this->userService->getGroupsMatchingCompanyName($user->ludens_company->name);
+		try {
+			$group = $this->userService->getGroupByOrgNumber($user->ludens_company->org_number);
+			$groups = [$group];
+		}
+		catch(NotFoundException $e) {
+			$groups = [];
+		}
 
 		/** @var Request $request */
 		$request = $this->getRequest();

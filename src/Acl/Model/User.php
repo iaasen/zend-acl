@@ -22,22 +22,23 @@ use Iaasen\Model\AbstractModel;
  * @property \DateTime $last_login
  */
 class User extends AbstractModel {
-	public static $access_level = array (
+	public static $access_level = [
 		0 => 'None',
 		1 => 'View',
 		2 => 'Edit own', // Create and edit own
 		3 => 'Edit all', // Edit others
 		4 => 'Admin',
 		5 => 'Master'
-	);
+	];
 
-	public static $login_types = array(
+	public static $login_types = [
 		'console' => 'Console',
 		'default' => 'Local',
-		'elfag' => 'elfag.no',
+		'elfag' => 'Gamle elfag.no',
+		'elfag2' => 'Elfag intranett',
 		'soap' => 'Visma',
 		'token' => 'Application/Website'
-	);
+	];
 
 	/** @var int */
 	protected $id;

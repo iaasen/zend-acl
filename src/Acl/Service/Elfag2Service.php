@@ -11,8 +11,8 @@ namespace Acl\Service;
 
 use Acl\Model\Group;
 use Acl\Model\User;
-use Zend\Mail\Transport\Smtp AS TransportSmtp;
-use Zend\Mail\Message AS MailMessage;
+use Iaasen\Messenger\Email;
+use Iaasen\Messenger\EmailService;
 
 class Elfag2Service
 {
@@ -20,14 +20,18 @@ class Elfag2Service
 	protected $userService;
 	/** @var GroupTable */
 	protected $groupTable;
-	/** @var TransportSmtp */
-	protected $mailTransport;
+	/** @var EmailService */
+	protected $emailService;
 
-	public function __construct($userService, $groupTable, $mailTransport)
+	public function __construct(
+		UserService $userService,
+		GroupTable $groupTable,
+		EmailService $emailService
+	)
 	{
 		$this->userService = $userService;
 		$this->groupTable = $groupTable;
-		$this->mailTransport = $mailTransport;
+		$this->emailService = $emailService;
 	}
 
 	/**
@@ -56,28 +60,29 @@ class Elfag2Service
 	}
 
 	/**
+	 * Connects group if it exists then updates access right
 	 * @param User $user
 	 * @param Group $group
-	 * @return bool
 	 * @throws \Exception
 	 */
 	public function connectUserToGroup(User $user, ?Group $group = null) {
 		if(!$group) $group = $this->groupTable->getGroupByLudensId($user->ludens_company->id);
 
-		// Give access
-		$this->userService->addUserToGroup($user, $group);
-		$user->setAccessLevel($group, ($user->ludens_permissions) ? 3 : 0);
-		$this->userService->saveUserAccess($user, $group);
+		if($group) {
+			// Give access
+			$this->userService->addUserToGroup($user, $group);
+			$user->setAccessLevel($group, ($user->ludens_permissions) ? 3 : 0);
+			$this->userService->saveUserAccess($user, $group);
 
-		// Update user
-		$user->current_group = $group->group;
-		$this->userService->saveUser($user);
+			// Update user
+			$user->current_group = $group->group;
+			$this->userService->saveUser($user);
 
-		// Update group
-		$group->ludens_id = $user->ludens_company->id;
-		$this->groupTable->save($group);
+			// Update group
+			$group->ludens_id = $user->ludens_company->id;
+			$this->groupTable->save($group);
 
-		return (bool) $user->ludens_permissions;
+		}
 	}
 
 	/**
@@ -92,13 +97,13 @@ class Elfag2Service
 			'group' => 'ludens-' . $user->ludens_company->id,
 			'name' => $user->ludens_company->name,
 			'ludens_id' => $user->ludens_company->id,
+			'org_number' => $user->ludens_company->org_number,
 		]);
 		$this->groupTable->save($group);
 
 		// Give access
 		$this->userService->addUserToGroup($user, $group);
-		$user->setAccessLevel($group, 5);
-		$this->userService->saveUserAccess($user, $group);
+		$this->connectUserToGroup($user, $group);
 
 		// Update user
 		$user->current_group = $group->group;
@@ -106,15 +111,13 @@ class Elfag2Service
 	}
 
 	public function sendEmailAboutMissingGroup(User $user) {
-		$mail = new MailMessage();
-		$mail->setEncoding("UTF-8");
-		$mail->setFrom('reklamasjon@oppned.com');
-		$mail->addTo('support@prosjektkalkulator.no');
-		$mail->setSubject($user->name . ' mangler kobling til ' . $user->ludens_company->name);
-		$mail->setBody(
+		$email = new Email();
+		$email->setTo('support@prosjektkalkulator.no');
+		$email->subject = $user->name . ' mangler kobling til ' . $user->ludens_company->name;
+		$email->body =
 			'Bruker:' . PHP_EOL .
-			iconv('utf-8', 'iso8859-1', print_r($user->getArrayCopy(), true)) . PHP_EOL . PHP_EOL
-		);
-		$this->mailTransport->send($mail);
+			iconv('utf-8', 'iso8859-1', print_r($user->getArrayCopy(), true)) . PHP_EOL . PHP_EOL;
+
+		$this->emailService->send($email);
 	}
 }

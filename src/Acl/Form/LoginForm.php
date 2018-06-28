@@ -4,7 +4,6 @@ namespace Acl\Form;
 use Oppned\Form\Element\Checkbox;
 use Oppned\Form\Element\Submit;
 use Oppned\Form\Element\Text;
-use Zend\Form\Element\Hidden;
 use Zend\Form\Element\Password;
 use Zend\Form\Form;
 use Zend\InputFilter\InputFilterProviderInterface;
@@ -15,11 +14,6 @@ class LoginForm extends Form implements InputFilterProviderInterface {
 		parent::__construct('user');
 		
 		$this->setAttribute('method', 'post');
-		
-		$this->add([
-			'name' => 'redirect',
-			'type' => Hidden::class,
-		]);
 		
 		$this->add([
 			'name' => 'username',

@@ -3,6 +3,7 @@
 namespace Acl\Service;
 
 use Acl\Model\Group;
+use Iaasen\Exception\NotFoundException;
 use Iaasen\Service\AbstractTable;
 use Zend\Db\Sql\Select;
 
@@ -59,6 +60,13 @@ class GroupTable extends AbstractTable {
 		if(count($rowSet) == 0)
 			return false;
 		return $rowSet[0];
+	}
+
+
+	public function getGroupByOrgNumber(int $orgNumber) : Group {
+		$groups = $this->fetchAll(['org_number' => $orgNumber]);
+		if(count($groups) == 1) return $groups[0];
+		else throw new NotFoundException();
 	}
 
 	/**

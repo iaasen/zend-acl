@@ -195,6 +195,10 @@ class UserService
 		return $matchedGroups;
 	}
 
+	public function getGroupByOrgNumber(int $orgNumber) : Group {
+		return $this->groupTable->getGroupByOrgNumber($orgNumber);
+	}
+
 	/**
 	 * @param User $user
 	 * @return bool|int

@@ -29,13 +29,8 @@ class Elfag2ServiceFactory implements FactoryInterface
 	{
 		$userService = $container->get(UserService::class);
 		$groupTable = $container->get(GroupTable::class);
+		$emailService = $container->get(\Iaasen\Messenger\EmailService::class);
 
-		$mailTransportConfig = $container->get('Config')['mail_transport'];
-		$mailTransport = new \Zend\Mail\Transport\Smtp();
-		$options = new \Zend\Mail\Transport\SmtpOptions($mailTransportConfig);
-		$mailTransport->setOptions($options);
-
-
-		return new Elfag2Service($userService, $groupTable, $mailTransport);
+		return new Elfag2Service($userService, $groupTable, $emailService);
 	}
 }
