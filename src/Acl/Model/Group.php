@@ -21,6 +21,8 @@ class Group extends AbstractModel {
 	/** @var string */
 	protected $name;
 	/** @var int */
+	protected $org_number;
+	/** @var int */
 	protected $ludens_id;
 	/** @var string */
 	protected $elfag_membership_number;
