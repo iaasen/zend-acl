@@ -57,7 +57,6 @@ class AuthController extends AbstractController {
 		if($this->authService->hasIdentity()) return $this->redirect()->toUrl($redirect);
 
 		$form = $this->loginForm;
-		//$form->get('redirect')->setValue($redirect);
 
 		/** @var Request $request */
 		$request = $this->getRequest();
@@ -79,14 +78,6 @@ class AuthController extends AbstractController {
 					}
 
 					$user = $this->userService->getUserByUsername($this->authService->getIdentity());
-//					if (!$user) { // Probably elfag2-user and it's the first login
-////						if(filter_var($this->authService->getIdentity(), FILTER_VALIDATE_EMAIL)) {
-////							$this->userService->createElfag2User($this->authService->getIdentity());
-////						}
-//						// Create user
-//						//return $this->redirect()->toRoute('user/createElfagUser');
-//					}
-
 					$user->last_login = new \DateTime();
 					$this->userService->saveUser($user);
 
@@ -139,78 +130,7 @@ class AuthController extends AbstractController {
 
 
 	
-//	public function authenticateAction() {
-//		$form = $this->loginForm;
-//		$redirect = $this->params()->fromPost('redirect');
-//		if(!$redirect) $redirect = $this->url()->fromRoute('auth/login');
-//
-//
-//
-//		/** @var Request $request */
-//		$request = $this->getRequest();
-//		if($request->isPost()) {
-//			$form->setData($request->getPost());
-//			if($form->isValid()) {
-//				$data = $form->getData();
-//				$this->authService->setIdentity($data['username']);
-//				$this->authService->setCredential($data['password']);
-//
-//				$result = $this->authService->authenticate();
-//
-//				foreach($result->getMessages() as $message) {
-//					$this->getFlashMessenger()->addMessage($message);
-//				}
-//
-//				if($result->isValid()) {
-//					$redirect = $this->url()->fromRoute('home');
-//
-//					if ($request->getPost('rememberMe') == 1) {
-//						$this->sessionStorage->setRememberMe(1);
-//						$this->authService->setStorage($this->sessionStorage);
-//					}
-//
-//					$user = $this->userService->getUserByUsername($this->authService->getIdentity());
-//
-//
-//					if (!$user) { // Probably elfag-user and it's the first login
-//						return $this->redirect()->toRoute('user/createElfagUser');
-//					}
-//
-//
-//					$user->last_login = time();
-//					$this->userService->saveUser($user);
-//
-//					// Make sure current_group is set
-//					if (!$user->current_group) {
-//						if (count($user->access) > 1) {
-//							return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
-//						} elseif (count($user->access) == 1) {
-//							$user->current_group = key($user->access);
-//							$this->userService->saveUser($user);
-//						} else {
-//							$this->redirect()->toRoute('user/noAccess');
-//						}
-//					}
-//					// No access to the current current_group
-//					if (!isset($user->access[$user->current_group])) {
-//						return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
-//					}
-//
-//					// Dispatch the login_successful event. Redirect if receiving a Response
-//					$results = $this->getEventManager()->trigger('login_successful', $this, ['identity' => $result->getIdentity()]);
-//					foreach ($results as $result) {
-//						if ($result instanceof Response) {
-//							return $result;
-//						}
-//					}
-//
-//					return $this->redirect()->toUrl($redirect);
-//				}
-//			}
-//		}
-//		return $this->redirect()->toUrl($redirect);
-//	}
-	
+
 	public function generateBcryptAction() {
 		$cost = $this->params()->fromPost('cost', 13);
 		//$password = $this->params()->fromPost('password', null);

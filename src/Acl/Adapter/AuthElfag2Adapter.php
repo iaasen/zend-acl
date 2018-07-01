@@ -39,14 +39,8 @@ class AuthElfag2Adapter extends AbstractAuthAdapter implements EventManagerAware
 			$tokenData = $this->httpTransport->sendPostWithJson('token', ['username' => $this->identity, 'password' => $this->credential]);
 			$tokenData = \GuzzleHttp\json_decode($tokenData);
 			if(strlen($tokenData->token)) {
-				if($tokenData->permissions > 0) {
-					$this->getEventManager()->trigger('user_elfag2_logged_in', get_class($this), ["tokenData" => $tokenData]);
-					return new Result(Result::SUCCESS, $tokenData->user_email);
-				}
-				else {
-					$this->getFlashMessenger()->addMessage("Du må ha tilgangen 'admin' eller 'installatør' for å få tilgang til denne tjenesten", 'error');
-					return new Result(Result::FAILURE_UNCATEGORIZED, $tokenData->user_email);
-				}
+				$this->getEventManager()->trigger('user_elfag2_logged_in', get_class($this), ["tokenData" => $tokenData]);
+				return new Result(Result::SUCCESS, $tokenData->user_email);
 			}
 			else return new Result(Result::FAILURE, null);
 		}

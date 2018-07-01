@@ -4,9 +4,18 @@
  * User: iaase
  * Date: 10.12.2017
  * Time: 21.56
+ * @var \Acl\Model\CurrentUser $currentUser
  */
 ?>
 
-<h1>Ingen tilgang</h1>
-
-<p>Denne brukeren har dessverre ikke tilgang til tjenestene i dette systemet</p>
+<?php if($currentUser->logintype == 'elfag2'): ?>
+    <h1>Ingen tilgang</h1>
+    <p>
+        Tilgang til denne tjenesten er basert på tilgangsnivået du har i Elfag intranett (<a href="https://intranett.elfag.no">https://intranett.elfag.no</a>)
+        <br>
+        Du trenger tilgangsnivå "installatør" eller "admin" for å få tilgang.
+    </p>
+<?php else: ?>
+    <h1>Ingen tilgang</h1>
+    <p>Denne brukeren har dessverre ikke tilgang til tjenestene i dette systemet</p>
+<?php endif; ?>

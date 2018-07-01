@@ -466,15 +466,9 @@ class UserController extends AbstractActionController {
 	}
 
 	public function noAccessAction() {
-
+		$currentUser = $this->userService->getCurrentUser();
+		return [
+			'currentUser' => $currentUser,
+		];
 	}
-	
-//	public function getTable($table) {
-//		if (!isset($this->tables[$table])) {
-//			$sm = $this->getServiceLocator();
-//			$table = ucfirst ($table);
-//			$this->tables[$table] = $sm->get ($table . 'Table');
-//		}
-//		return $this->tables [$table];
-//	}
 }

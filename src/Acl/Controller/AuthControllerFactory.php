@@ -9,34 +9,18 @@ namespace Acl\Controller;
 
 
 use Interop\Container\ContainerInterface;
-use Zend\Mvc\Controller\ControllerManager;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 class AuthControllerFactory implements FactoryInterface
 {
-
-//	/**
-//	 * @param ControllerManager $controllerManager
-//	 * @return AuthController
-//	 */
-//	public function __invoke($controllerManager)
-//	{
-//	}
-
 	/**
-	 * Create an object
-	 *
-	 * @param  ContainerInterface $container
-	 * @param  string $requestedName
-	 * @param  null|array $options
-	 * @return object
-	 * @throws \Psr\Container\ContainerExceptionInterface
-	 * @throws \Psr\Container\NotFoundExceptionInterface
+	 * @param ContainerInterface $container
+	 * @param string $requestedName
+	 * @param array|null $options
+	 * @return AuthController
 	 */
 	public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
 	{
-		if($container instanceof ControllerManager) $container = $container->getServiceLocator();
-
 		$authService = $container->get(\Acl\Service\AuthService::class);
 		$loginForm = $container->get(\Acl\Form\LoginForm::class);
 		$userTable = $container->get(\Acl\Service\UserTable::class);

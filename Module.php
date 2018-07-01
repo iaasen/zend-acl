@@ -2,10 +2,13 @@
 namespace Acl;
 
 use Acl\Adapter\AuthElfag2Adapter;
+use Acl\Service\AuthService;
 use Acl\Service\Elfag2Service;
+use Acl\Service\UserService;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\EventManager\Event;
 use Zend\EventManager\EventManager;
+use Zend\Http\PhpEnvironment\Response;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
@@ -31,6 +34,7 @@ class Module implements AutoloaderProviderInterface {
 	protected $whitelist = array(
 		'auth/login',
 		'auth/authenticate',
+		'user/noAccess',
 		'login/process/createuser',
 		'login/process/generatebcrypt',
 		'soap/soap',
@@ -43,61 +47,80 @@ class Module implements AutoloaderProviderInterface {
 	
 	public function onBootstrap(MvcEvent $e)
 	{
+		/** @var EventManager $eventManager */
 		$eventManager        = $e->getApplication()->getEventManager();
 		$moduleRouteListener = new ModuleRouteListener();
 		$moduleRouteListener->attach($eventManager);
 		$this->bootstrapSession($e);
-		
+
+		/** @var ServiceManager $serviceManager */
 		$serviceManager = $e->getApplication()->getServiceManager();
-		$acl = $serviceManager->get('Acl\AuthService');
-		$list = $this->whitelist;
+		/** @var AuthService $authService */
+		$authService = $serviceManager->get(\Acl\Service\AuthService::class);
+		/** @var UserService $userService */
+		$userService = $serviceManager->get(\Acl\Service\UserService::class);
+		$whitelist = $this->whitelist;
 
 		$this->elfag2UserLoggedInEvent($eventManager, $serviceManager);
 	
-		$eventManager->attach(MvcEvent::EVENT_ROUTE, function(MvcEvent $e) use ($list, $acl) {
+		$eventManager->attach(MvcEvent::EVENT_ROUTE, function(MvcEvent $e) use ($whitelist, $authService, $userService) {
 			/** @var \Bugsnag\Client $bugsnag */
 			global $bugsnag;
-
-			if($e->getRequest() instanceof \Zend\Console\Request) return;
-			
-			$match = $e->getRouteMatch();
-
 			$redirect = $_SERVER['REQUEST_URI'];
 
-			if(!$match instanceof RouteMatch) {
-				return;
-			}
+			// Always give console users access
+			if($e->getRequest() instanceof \Zend\Console\Request) return true;
+			
+			// Can't remember what this one is for
+			if(!$e->getRouteMatch() instanceof RouteMatch) return true;
 
-			if($acl->hasIdentity()) {
+			// Logged in user
+			if($authService->hasIdentity()) {
 				if($bugsnag) {
-					$bugsnag->registerCallback(function (\Bugsnag\Report $report) use ($acl) {
+					$bugsnag->registerCallback(function (\Bugsnag\Report $report) use ($authService) {
 						$report->setUser([
-							'username' => $acl->getIdentity(),
+							'username' => $authService->getIdentity(),
 						]);
 					});
 				}
-				return;
-			}
-			$name = $match->getMatchedRouteName();
-			$action = $match->getParam('action');
-			$searchName = $name . '/' . $action;
-			//~r($searchname);
-			if(in_array($name, $list) || in_array($searchName, $list)) {
-				return;
+
+				$currentUser = $userService->getCurrentUser();
+				// User have access
+				if($currentUser->getAccessLevel() > 0) return true;
+				// User has no access (is authenticated but not authorized)
+				else {
+					if($this->checkWhitelist($e, $whitelist)) return true;
+					return $this->createRedirectResponse($e, 'user/noAccess', $redirect);
+				}
 			}
 
-			$router = $e->getRouter();
-			$url = $router->assemble(array(), array(
-				'name'	=>	'auth/login',
-			));
+			// Give access if called page is in the whitelist
+			if($this->checkWhitelist($e, $whitelist)) return true;
 
-			$response = $e->getResponse();
-			//$response->getHeaders()->addHeaderLine('Location', $url);
-			$response->getHeaders()->addHeaderLine('Location', $url . '?redirect=' . $redirect);
-			$response->setStatusCode(302);
-			return $response;
+			// Send user to login screen
+			return $this->createRedirectResponse($e, 'auth/login', $redirect);
+
 		}, -100);
 
+	}
+
+	// Check if request is in the whitelist
+	protected function checkWhitelist(MvcEvent $event, array $whitelist) : bool {
+		$match = $event->getRouteMatch();
+		$name = $match->getMatchedRouteName();
+		$action = $match->getParam('action');
+		$searchName = $name . '/' . $action;
+		if(in_array($name, $whitelist) || in_array($searchName, $whitelist)) return true;
+		else return false;
+	}
+
+	protected function createRedirectResponse(MvcEvent $event, string $newRoute, string $originalRoute) : string {
+		$url = $event->getRouter()->assemble([], ['name' => $newRoute]);
+		/** @var Response $response */
+		$response = $event->getResponse();
+		$response->getHeaders()->addHeaderLine('Location', $url . '?redirect=' . $originalRoute);
+		$response->setStatusCode(302);
+		return $response;
 	}
 
 	/**
@@ -129,36 +152,19 @@ class Module implements AutoloaderProviderInterface {
 	}
 	
 	public function getServiceConfig() {
-		return array(
-			'factories' => array(
-//				'Acl\AuthSoapService' => function($sm) {
-//					//$dbAdapter = $sm->get('Db\Acl');
-//					$authSoap = $sm->get('Acl\AuthSoapAdapter');
-//					$authService = new AuthService();
-//					$authService->addAdapter($authSoap);
-//					$authService->setStorage($sm->get('Acl\Model\AclStorage'));
-//					//$logger = new \Zend\Log\Logger;
-//					//$logger->addWriter('stream', null, array('stream' => 'c:\log.txt'));
-//					return $authService;
-//				},
-//				'Acl\AuthLocalAdapter' => function($sm) {
-//					return new AuthLocalAdapter($sm->get('Db\Acl'), 'users', 'username', 'password');
-//				},
-//				'Acl\AuthSoapAdapter' => function($sm) {
-//					return new AuthSoapAdapter($sm->get('Db\Acl'), 'users', 'username', 'password');
-//				},
-				'Zend\Session\SessionManager' => function ($sm) {
+		return [
+			'factories' => [
+				'Zend\Session\SessionManager' => function (ServiceManager $sm) {
 					$conf = $sm->get('config');
 					$conf = $conf['session'];
 				
 					$sessionConfig = null;
 					if (isset($conf['config'])) {
-						$options = isset($conf['config']['options']) ? $conf['config']['options'] : array();
+						$options = isset($conf['config']['options']) ? $conf['config']['options'] : [];
 						$sessionConfig = new \Zend\Session\Config\SessionConfig();
 						$sessionConfig->setOptions($options);
 					}
 				
-					//$tableGateway = $sm->get('SessionTableGateway');
 					$dbAdapter = $sm->get('Db\Acl');
 					$tableGateway = new TableGateway('sessions', $dbAdapter);
 					$saveHandler = new DbTableGateway($tableGateway, new DbTableGatewayOptions());
@@ -166,12 +172,7 @@ class Module implements AutoloaderProviderInterface {
 					Container::setDefaultManager($sessionManager);
 					return $sessionManager;
 				},
-//				'SessionTableGateway' => function ($sm) {
-//					$dbAdapter = $sm->get('Db\Acl');
-//					return new TableGateway('sessions', $dbAdapter);
-//				},
-				
-			),
-		);
+			],
+		];
 	}
 }
