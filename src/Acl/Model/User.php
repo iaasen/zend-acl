@@ -110,6 +110,17 @@ class User extends AbstractModel {
 	}
 
 	/**
+	 * How many companies has the user access to?
+	 */
+	public function countGroupAccesses() {
+		$count = 0;
+		foreach($this->access AS $access) {
+			if($access->access_level > 0) $count++;
+		}
+		return $count;
+	}
+
+	/**
 	 * @param Group|string $group
 	 * @return int
 	 */
@@ -118,6 +129,7 @@ class User extends AbstractModel {
 		if($this->logintype == 'console') return 6;
 
 		if(!$group) $group = $this->current_group;
+		if(!$group) return 0;
 
 		if(is_object($group)) $groupName = $group->group;
 		else $groupName = $group;

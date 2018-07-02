@@ -84,21 +84,7 @@ class AuthController extends AbstractController {
 					// Update access to elfag2 user
 					if($user->logintype == 'elfag2') {
 						$this->elfag2Service->connectUserToGroup($user);
-						if(!$user->ludens_permissions) return $this->redirect()->toRoute('user/noAccess');
-					}
-					// Make sure current_group is set
-					if (!$user->current_group || $user->getAccessLevel() < 1) {
-						if (count($user->access) > 1) {
-							return $this->redirect()->toRoute('user/selectGroup', [], ['query' => ['redirect' => $redirect]]);
-						} elseif (count($user->access) == 1) {
-							$user->current_group = key($user->access);
-							$this->userService->saveUser($user);
-						} else {
-							if($user->logintype == 'elfag2') {
-								return $this->redirect()->toRoute('user/create-elfag2-group');
-							}
-							else $this->redirect()->toRoute('user/noAccess');
-						}
+						if(!$user->countGroupAccesses()) return $this->redirect()->toRoute('user/create-elfag2-group');
 					}
 
 					// No access to the current current_group

@@ -22,19 +22,18 @@ use Zend\Session\SaveHandler\DbTableGatewayOptions;
 
 class Module implements AutoloaderProviderInterface {
 	public function getAutoloaderConfig() {
-		return array(
-			'Zend\Loader\StandardAutoloader' => array(
-				'namespaces' => array(
+		return [
+			'Zend\Loader\StandardAutoloader' => [
+				'namespaces' => [
 					__NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-				),
-			),
-		);
+				],
+			],
+		];
 	}
 	
-	protected $whitelist = array(
+	protected $whitelist = [
 		'auth/login',
 		'auth/authenticate',
-		'user/noAccess',
 		'login/process/createuser',
 		'login/process/generatebcrypt',
 		'soap/soap',
@@ -43,7 +42,14 @@ class Module implements AutoloaderProviderInterface {
 		'claim/email',
 		'claimemail',
 		'claim/emailFile',
-	);
+	];
+
+	protected $authenticatedWhitelist = [
+		'user/noAccess',
+		'user/create-elfag2-group',
+		'user/missing-elfag2-group',
+		'user/selectGroup',
+	];
 	
 	public function onBootstrap(MvcEvent $e)
 	{
@@ -60,10 +66,11 @@ class Module implements AutoloaderProviderInterface {
 		/** @var UserService $userService */
 		$userService = $serviceManager->get(\Acl\Service\UserService::class);
 		$whitelist = $this->whitelist;
+		$authenticatedWhitelist = $this->authenticatedWhitelist;
 
 		$this->elfag2UserLoggedInEvent($eventManager, $serviceManager);
 	
-		$eventManager->attach(MvcEvent::EVENT_ROUTE, function(MvcEvent $e) use ($whitelist, $authService, $userService) {
+		$eventManager->attach(MvcEvent::EVENT_ROUTE, function(MvcEvent $e) use ($whitelist, $authenticatedWhitelist, $authService, $userService) {
 			/** @var \Bugsnag\Client $bugsnag */
 			global $bugsnag;
 			$redirect = $_SERVER['REQUEST_URI'];
@@ -84,14 +91,20 @@ class Module implements AutoloaderProviderInterface {
 					});
 				}
 
+				// Give access if called page is in the whitelist for authenticated users without authorization
+				if($this->checkWhitelist($e, $authenticatedWhitelist)) return true;
+
 				$currentUser = $userService->getCurrentUser();
-				// User have access
-				if($currentUser->getAccessLevel() > 0) return true;
-				// User has no access (is authenticated but not authorized)
-				else {
-					if($this->checkWhitelist($e, $whitelist)) return true;
+
+				// No access to any group
+				if(!$currentUser->countGroupAccesses()) {
 					return $this->createRedirectResponse($e, 'user/noAccess', $redirect);
 				}
+
+				// Current group is set and user have access
+				if($currentUser->current_group && $currentUser->getAccessLevel()) return true;
+				// Have access to at least one group
+				else return $this->createRedirectResponse($e, 'user/selectGroup', $redirect);
 			}
 
 			// Give access if called page is in the whitelist
