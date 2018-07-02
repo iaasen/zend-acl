@@ -9,6 +9,7 @@ use Iaasen\Model\AbstractModel;
  * @property int $id
  * @property string $group
  * @property string $name
+ * @property int $org_number
  * @property int $ludens_id
  * @property string $onninen_customer_id
  * @property string $elfag_membership_number

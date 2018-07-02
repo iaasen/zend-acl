@@ -81,12 +81,9 @@ class Elfag2Service
 			$user->setAccessLevel($group, ($user->ludens_permissions) ? 3 : 0);
 			$this->userService->saveUserAccess($user, $group);
 
-			// Update user
-			$user->current_group = $group->group;
-			$this->userService->saveUser($user);
-
 			// Update group
 			$group->ludens_id = $user->ludens_company->id;
+			$group->org_number = $user->ludens_company->org_number;
 			$this->groupTable->save($group);
 
 		}

@@ -13,9 +13,9 @@
 
 <p>
 	Hei <?= $user->name ?>.<br>
-	Vi ser du har logget inn med konto fra Elfag intranett (brukernavn <?= $user->username ?>) for første gang.<br>
+	Vi ser du har logget inn med konto fra Elfag intranett (brukernavn <?= $user->username ?>).<br>
 	Ifølge intranett heter firmaet ditt: <b><?= $user->ludens_company->name ?></b><br>
-	Kan du hjelpe oss og finne igjen firmaet ditt?<br>
+	Vi kan ikke se at noen fra det firmaet har logget inn her før.<br>
 </p>
 
 
@@ -24,7 +24,7 @@
 		<div class="radio">
 			<label>
 				<input type="radio" name="company" value="new">
-				Nytt firma, dette er første gang jeg logger inn
+				Det er som ventet, dette er første gang jeg logger inn her.
 			</label>
 		</div>
 		<?php foreach($groups AS $group): ?>
@@ -38,7 +38,7 @@
 		<div class="radio">
 			<label>
 				<input type="radio" name="company" value="missing">
-				Jeg har brukt tjenesten før, men finner ikke firmanavnet mitt i listen her
+				Jeg har brukt tjenesten før og burde se firmaet mitt her. Vær vennlig å sjekk dette for meg.
 			</label>
 		</div>
 		<input type="submit" value="Lagre">
