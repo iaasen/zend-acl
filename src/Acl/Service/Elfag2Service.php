@@ -11,6 +11,7 @@ namespace Acl\Service;
 
 use Acl\Model\Group;
 use Acl\Model\User;
+use Iaasen\Exception\NotFoundException;
 use Iaasen\Messenger\Email;
 use Iaasen\Messenger\EmailService;
 
@@ -67,6 +68,12 @@ class Elfag2Service
 	 */
 	public function connectUserToGroup(User $user, ?Group $group = null) {
 		if(!$group) $group = $this->groupTable->getGroupByLudensId($user->ludens_company->id);
+		try {
+			if(!$group) $group = $this->groupTable->getGroupByOrgNumber($user->ludens_company->org_number);
+		}
+		catch (NotFoundException $e) {};
+		if(!$group) $group = $this->groupTable->getGroupByName('ludens-' . $user->ludens_company->id);
+
 
 		if($group) {
 			// Give access

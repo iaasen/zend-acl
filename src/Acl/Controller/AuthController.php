@@ -84,7 +84,7 @@ class AuthController extends AbstractController {
 					// Update access to elfag2 user
 					if($user->logintype == 'elfag2') {
 						$this->elfag2Service->connectUserToGroup($user);
-						if(!$user->countGroupAccesses()) return $this->redirect()->toRoute('user/create-elfag2-group');
+						if(!$user->countGroupAccesses() && !count($user->access)) return $this->redirect()->toRoute('user/create-elfag2-group');
 					}
 
 					// No access to the current current_group
