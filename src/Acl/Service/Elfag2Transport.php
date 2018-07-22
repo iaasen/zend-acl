@@ -28,7 +28,7 @@ class Elfag2Transport extends GuzzleHttpTransport
 	 * If function returns false the API error will be forwarded
 	 * @return bool
 	 */
-	protected function renewSession()
+	protected function renewSession() : bool
 	{
 		return false;
 	}
