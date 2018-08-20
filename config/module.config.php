@@ -116,6 +116,14 @@ return [
 //						'default_value' => null,
 //						'access_level' => 3,
 //					],
+					'logo' => [
+						'label' => 'Firmalogo',
+						'type' => 'file',
+						'access_level' => 3,
+						'options' => [
+							'file_types' => ['jpg', 'png'],
+						],
+					]
 				],
 			],
 		], 
