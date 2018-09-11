@@ -76,7 +76,7 @@ class UserTable extends AbstractTable {
 		else {
 			$rowSet = $this->fetchAll(['username' => $identity]);
 			if(count($rowSet) > 1)
-				throw new \Exception('Multiple users with same username. Something is wrong.');
+				throw new \DomainException('Multiple users with same username. Something is wrong.');
 				
 			if(count($rowSet) == 0) {
 				Message::create(3, 'User not found');
@@ -98,7 +98,7 @@ class UserTable extends AbstractTable {
 		if(!strlen($identity)) return false;
 		$rowSet = $this->fetchAll(['username' => $identity, 'logintype' => $loginType]);
 		if(count($rowSet) > 1)
-			throw new \Exception('Multiple users with same username. Something is wrong.');
+			throw new \DomainException('Multiple users with same username. Something is wrong.');
 
 		if(count($rowSet) == 0) {
 			Message::create(3, 'User not found');
@@ -125,14 +125,13 @@ class UserTable extends AbstractTable {
 	}
 
 	/**
-	 * TODO: Must be converted to not use currentUser
 	 * @param string $start
 	 * @param null|string $group
 	 * @return bool|string
 	 */
 	public function getUniqueUsername($start, $group = null) {
 		if($group == null) {
-			$currentUser = $this->getCurrentUser();
+			$currentUser = $this->currentUser;
 			$group = $currentUser->current_group;
 		}
 		if(!$this->accessToView($group, 'group')) return false;
@@ -148,9 +147,10 @@ class UserTable extends AbstractTable {
 		}
 		  
 		for($i = $counter; ; $i++) {
-			if(!count($this->fetchAll(array('username' => $start . $i))))
+			if(!count($this->fetchAll(['username' => $start . $i])))
 				return $start . $i;
 		}
+		return false;
 	}
 	
 	public function getUserAccess(User $user) {
@@ -184,32 +184,26 @@ class UserTable extends AbstractTable {
 	/**
 	 * @param User $user
 	 * @return User|false
+	 * @throws \Exception
 	 */
 	public function create($user) {
 		$access = false;
-		foreach($this->getCurrentUser()->access AS $current) {
+		foreach($this->currentUser->access AS $current) {
 			if($current['access_level'] > 4) {
 				$access = true;
 				break;
 			}
 		}
 		if(!$access) return false;
-		
+
+		// Check if email is set
+		if(!strlen($user->email)) return false;
 		// Check if email is in use
 		$check = $this->getUserByEmail($user->email);
 		if($check) return false;
-		// Check if email is set
-		if(!strlen($user->email)) return false;
-		
-		$savedata = $user->databaseSaveArray();
-		unset($savedata['id']);
-		
-		$success = $this->primaryGateway->insert($savedata);
-		if(!$success) return false;
-		else {
-			$id = (int) $this->primaryGateway->getLastInsertValue();
-			return $this->getUser($id); 
-		}
+
+		$userId =  parent::save($user);
+		return $this->find($userId);
 	}
 
 	/**
@@ -221,30 +215,7 @@ class UserTable extends AbstractTable {
 		//get the trace
 		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 		if($trace[1]['class'] != UserService::class) throw new \Exception('Save can only be done by UserService');
-
-		$data = $user->databaseSaveArray();
-
-		// Save to database
-		unset($data['id']);
-		unset($data['timestamp_created']);
-		
-		$id = (int) $user->id;
-		if ($id == 0) {
-			$data['timestamp_created'] = date("Y-m-d H:i:s");
-			$this->primaryGateway->insert($data);
-			$id = (int) $this->primaryGateway->getLastInsertValue();
-		}
-		else {
-			if ($this->find($id)) {
-				$this->primaryGateway->update($data, array (
-					'id' => $id,
-				));
-			}
-			else {
-				throw new \Exception('id does not exist');
-			}
-		}
-		return $id;
+		return parent::save($user);
 	}
 
 	/**
@@ -262,7 +233,7 @@ class UserTable extends AbstractTable {
 	}
 	
 	public function accessToView($mixed, $object = 'user') {
-		$currentUser = $this->getCurrentUser();
+		$currentUser = $this->currentUser;
 		
 		if($object == 'user') {
 			if(count(array_intersect_key($mixed->access, $currentUser->access))) return true;
@@ -297,13 +268,13 @@ class UserTable extends AbstractTable {
 		if($group instanceof Group) $group = $group->group;
 		
 		// Not member of the group
-		if(!isset($this->getCurrentUser()->access[$group])) {
+		if(!isset($this->currentUser->access[$group])) {
 			Message::create(3, 'Cannot create user, you are not a member of this group');
 			return false;
 		}
 		
 		// Access level too low
-		if($this->getCurrentUser()->access[$group]['access_level'] < 4) { // 4 = Admin
+		if($this->currentUser->access[$group]['access_level'] < 4) { // 4 = Admin
 			Message::create(3, 'Cannot create user, you access level is too low');
 			return false;
 		}

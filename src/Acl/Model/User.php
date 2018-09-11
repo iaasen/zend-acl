@@ -1,6 +1,7 @@
 <?php
 
 namespace Acl\Model;
+use Iaasen\Entity\DateTime;
 use Iaasen\Model\AbstractModel;
 
 
@@ -58,16 +59,16 @@ class User extends AbstractModel {
 	protected $ludens_id;
 	/** @var int */
 	protected $ludens_permissions;
-	/** @var \stdClass */
+	/** @var mixed[] */
 	protected $ludens_company;
 	/** @var bool */
 	protected $superuser;
 	/** @var string */
 	protected $current_group;
-	/** @var \DateTime */
+	/** @var DateTime */
 	protected $last_login;
 
-	/** @var Access[] */
+	/** @var \Acl\Model\Access[] */
 	public $access = [];
 
 	/**
@@ -196,6 +197,7 @@ class User extends AbstractModel {
 				break;
 			default :
 				parent::__set($name, $value);
+				break;
 		}
 	}
 
