@@ -21,6 +21,7 @@ return [
 			\Acl\Adapter\AuthLocalAdapter::class => \Acl\Adapter\AuthLocalAdapterFactory::class,
 			\Acl\Adapter\AuthElfag2Adapter::class => \Acl\Adapter\AuthElfag2AdapterFactory::class,
 			\Acl\Model\AclStorage::class => \Acl\Model\AclStorageFactory::class,
+			\Acl\Model\CurrentUser::class => \Acl\Model\CurrentUserFactory::class,
 			\Acl\Service\AccessTable::class => \Acl\Service\AccessTableFactory::class,
 			\Acl\Service\AuthService::class => \Acl\Service\AuthServiceFactory::class,
 			\Acl\Service\Elfag2Service::class => \Acl\Service\Elfag2ServiceFactory::class,
