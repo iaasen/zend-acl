@@ -87,7 +87,13 @@ class Elfag2Service
 			$this->userService->addUserToGroup($user, $group);
 			$user->setAccessLevel($group, 3);
 			$this->userService->saveUserAccess($user, $group);
+
 			$group = $this->groupTable->getGroupByName('ingvar');
+			$this->userService->addUserToGroup($user, $group);
+			$user->setAccessLevel($group, 3);
+			$this->userService->saveUserAccess($user, $group);
+
+			$group = $this->groupTable->getGroupByName('global');
 			$this->userService->addUserToGroup($user, $group);
 			$user->setAccessLevel($group, 3);
 			$this->userService->saveUserAccess($user, $group);
