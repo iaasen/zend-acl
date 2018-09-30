@@ -81,22 +81,16 @@ class Elfag2Service
 			}
 		}
 
+		// Special access for system owners
 		if(in_array($user->username, ['ann-kristin@elfag.no', 'geir.syversen@onninen.com'])) {
-			// Special access for system owners
-			$group = $this->groupTable->getGroupByName('elfag');
-			$this->userService->addUserToGroup($user, $group);
-			$user->setAccessLevel($group, 3);
-			$this->userService->saveUserAccess($user, $group);
 
-			$group = $this->groupTable->getGroupByName('ingvar');
-			$this->userService->addUserToGroup($user, $group);
-			$user->setAccessLevel($group, 3);
-			$this->userService->saveUserAccess($user, $group);
-
-			$group = $this->groupTable->getGroupByName('global');
-			$this->userService->addUserToGroup($user, $group);
-			$user->setAccessLevel($group, 3);
-			$this->userService->saveUserAccess($user, $group);
+			$groupNames = ['elfag', 'ludens-1834', 'ingvar', 'global'];
+			foreach($groupNames AS $groupName) {
+				$group = $this->groupTable->getGroupByName($groupName);
+				$this->userService->addUserToGroup($user, $group);
+				$user->setAccessLevel($group, 3);
+				$this->userService->saveUserAccess($user, $group);
+			}
 		}
 		elseif($group) {
 			// Give access
