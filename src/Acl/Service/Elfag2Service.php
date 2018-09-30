@@ -67,15 +67,32 @@ class Elfag2Service
 	 * @throws \Exception
 	 */
 	public function connectUserToGroup(User $user, ?Group $group = null) {
-		if(!$group) $group = $this->groupTable->getGroupByLudensId($user->ludens_company->id);
-		try {
-			if(!$group) $group = $this->groupTable->getGroupByOrgNumber($user->ludens_company->org_number);
+		if(!$group) {
+			if(isset($user->ludens_company->id))
+				$group = $this->groupTable->getGroupByLudensId($user->ludens_company->id);
+			if(!$group && isset($user->ludens_company->org_number)) {
+				try {
+					$group = $this->groupTable->getGroupByOrgNumber($user->ludens_company->org_number);
+				}
+				catch (NotFoundException $e) {};
+			}
+			if(!$group && isset($user->ludens_company->id)) {
+				$group = $this->groupTable->getGroupByName('ludens-' . $user->ludens_company->id);
+			}
 		}
-		catch (NotFoundException $e) {};
-		if(!$group) $group = $this->groupTable->getGroupByName('ludens-' . $user->ludens_company->id);
 
-
-		if($group) {
+		if(in_array($user->username, ['ann-kristin@elfag.no', 'geir.syversen@onninen.com'])) {
+			// Special access for system owners
+			$group = $this->groupTable->getGroupByName('elfag');
+			$this->userService->addUserToGroup($user, $group);
+			$user->setAccessLevel($group, 3);
+			$this->userService->saveUserAccess($user, $group);
+			$group = $this->groupTable->getGroupByName('ingvar');
+			$this->userService->addUserToGroup($user, $group);
+			$user->setAccessLevel($group, 3);
+			$this->userService->saveUserAccess($user, $group);
+		}
+		elseif($group) {
 			// Give access
 			$this->userService->addUserToGroup($user, $group);
 			$user->setAccessLevel($group, ($user->ludens_permissions) ? 3 : 0);
@@ -85,7 +102,6 @@ class Elfag2Service
 			$group->ludens_id = $user->ludens_company->id;
 			$group->org_number = $user->ludens_company->org_number;
 			$this->groupTable->save($group);
-
 		}
 	}
 
