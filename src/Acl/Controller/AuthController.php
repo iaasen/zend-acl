@@ -28,6 +28,8 @@ class AuthController extends AbstractController {
 	protected $sessionStorage;
 	/** @var Elfag2Service */
 	protected $elfag2Service;
+	/** @var SessionMessenger */
+	protected $messenger;
 
 	public function __construct(
 		AuthService $authService,
@@ -35,14 +37,16 @@ class AuthController extends AbstractController {
 		UserService $userService,
 		UserTable $userTable,
 		AclStorage $sessionStorage,
-		Elfag2Service $elfag2Service)
-	{
+		Elfag2Service $elfag2Service,
+		SessionMessenger $messenger
+	) {
 		$this->authService = $authService;
 		$this->loginForm = $loginForm;
 		$this->userService = $userService;
 		$this->userTable = $userTable;
 		$this->sessionStorage = $sessionStorage;
 		$this->elfag2Service = $elfag2Service;
+		$this->messenger = $messenger;
 	}
 
 
@@ -70,7 +74,7 @@ class AuthController extends AbstractController {
 				$result = $this->authService->authenticate();
 
 				if($result->isValid()) {
-					$this->getFlashMessenger()->addSuccessMessage('Logget inn som "' . $result->getIdentity() . '"');
+					$this->messenger->addSuccessMessage('Logget inn som "' . $result->getIdentity() . '"');
 
 					if ($request->getPost('rememberMe') == 1) {
 						$this->sessionStorage->setRememberMe(1);
@@ -102,7 +106,7 @@ class AuthController extends AbstractController {
 					return $this->redirect()->toUrl($redirect);
 				}
 				else {
-					$this->getFlashMessenger()->addErrorMessage('Feil brukernavn eller passord');
+					$this->messenger->addErrorMessage('Feil brukernavn eller passord');
 				}
 			}
 		}
@@ -119,7 +123,6 @@ class AuthController extends AbstractController {
 
 	public function generateBcryptAction() {
 		$cost = $this->params()->fromPost('cost', 13);
-		//$password = $this->params()->fromPost('password', null);
 
 		/** @var Request $request */
 		$request = $this->getRequest();
@@ -143,19 +146,8 @@ class AuthController extends AbstractController {
 		$this->sessionStorage->forgetMe();
 		$this->authService->clearIdentity();
 		
-		$this->getFlashMessenger()->addMessage('Du er logget ut');
+		$this->messenger->addSuccessMessage('Du er logget ut');
+
 		return $this->redirect()->toRoute('auth/login');
 	}
-	
-	public function createuserAction() {
-		
-	}
-
-	/**
-	 * @return SessionMessenger
-	 */
-	protected function getFlashMessenger() : SessionMessenger {
-		return $this->flashMessenger();
-	}
-
 }

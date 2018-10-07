@@ -54,9 +54,9 @@ class Elfag2Service
 		$user->exchangeArray([
 			'name' => $tokenData->user_display_name,
 			'ludens_id' => $tokenData->user_id,
+			'ludens_company' => $tokenData->company,
 			'ludens_permissions' => $tokenData->permissions,
 		]);
-		$user->ludens_company = $tokenData->company;
 		$this->userService->saveUser($user);
 	}
 

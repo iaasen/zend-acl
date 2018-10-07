@@ -145,6 +145,7 @@ class Module implements AutoloaderProviderInterface {
 			AuthElfag2Adapter::class,
 			'user_elfag2_logged_in',
 			function(Event $e) use ($serviceManager) {
+				/** @var Elfag2Service $elfag2Service */
 				$elfag2Service = $serviceManager->get(Elfag2Service::class);
 				$elfag2Service->createUserIfNeeded($e->getParam('tokenData'));
 			}

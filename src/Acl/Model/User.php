@@ -59,7 +59,7 @@ class User extends AbstractModel {
 	protected $ludens_id;
 	/** @var int */
 	protected $ludens_permissions;
-	/** @var mixed[] */
+	/** @var \stdClass */
 	protected $ludens_company;
 	/** @var bool */
 	protected $superuser;
@@ -159,7 +159,7 @@ class User extends AbstractModel {
 	/**
 	 * Called by $form->bind()
 	 *
-	 * @return array $_data Arraycopy of the datafields
+	 * @return array Array copy of the data fields
 	 * @throws \Exception
 	 */
 	public function getArrayCopy() {
@@ -169,9 +169,9 @@ class User extends AbstractModel {
 	}
 
 	/**
-	 * Used by DbTable to format modeldata for the database.
+	 * Used by DbTable to format model data for the database.
 	 *
-	 * @return array $_data
+	 * @return array
 	 */
 	public function databaseSaveArray() {
 		$data = parent::databaseSaveArray();

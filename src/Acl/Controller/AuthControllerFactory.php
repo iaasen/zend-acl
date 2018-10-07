@@ -27,6 +27,7 @@ class AuthControllerFactory implements FactoryInterface
 		$userService = $container->get(\Acl\Service\UserService::class);
 		$sessionStorage = $container->get(\Acl\Model\AclStorage::class);
 		$elfag2Service = $container->get(\Acl\Service\Elfag2Service::class);
+		$messenger = $container->get(\Iaasen\Messenger\SessionMessenger::class);
 
 		return new AuthController(
 			$authService,
@@ -34,7 +35,8 @@ class AuthControllerFactory implements FactoryInterface
 			$userService,
 			$userTable,
 			$sessionStorage,
-			$elfag2Service
+			$elfag2Service,
+			$messenger
 		);
 
 	}
