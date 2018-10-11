@@ -45,7 +45,9 @@ class GroupTable extends AbstractTable {
 	 * @return Group|false
 	 */
 	public function getGroupById($id) {
-		return parent::find($id);
+		/** @var Group $group */
+		$group = parent::find($id);
+		return $group;
 	}
 
 	/**
@@ -62,7 +64,10 @@ class GroupTable extends AbstractTable {
 		return $rowSet[0];
 	}
 
-
+	/**
+	 * @param int $orgNumber
+	 * @return Group
+	 */
 	public function getGroupByOrgNumber(int $orgNumber) : Group {
 		$groups = $this->fetchAll(['org_number' => $orgNumber]);
 		if(count($groups) == 1) return $groups[0];
@@ -70,10 +75,10 @@ class GroupTable extends AbstractTable {
 	}
 
 	/**
-	 * @param $id
+	 * @param int $id
 	 * @return Group|false
 	 */
-	public function getGroupByLudensId($id) {
+	public function getGroupByLudensId(int $id) {
 		$rowSet = $this->fetchAll(['ludens_id' => $id]);
 		if(count($rowSet)) return $rowSet[0];
 		else return false;

@@ -389,13 +389,13 @@ class UserController extends AbstractActionController {
 	public function createElfag2GroupAction() {
 		$user = $this->currentUser;
 
-		//$groups = $this->userService->getGroupsMatchingCompanyName($user->ludens_company->name);
-		try {
-			$group = $this->userService->getGroupByOrgNumber($user->ludens_company->org_number);
-			$groups = [$group];
-		}
-		catch(NotFoundException $e) {
-			$groups = [];
+		$groups = [];
+		if(is_numeric($user->ludens_company->org_number)) {
+			try {
+				$group = $this->userService->getGroupByOrgNumber((int) $user->ludens_company->org_number);
+				$groups = [$group];
+			}
+			catch(NotFoundException $e) {}
 		}
 
 		/** @var Request $request */
