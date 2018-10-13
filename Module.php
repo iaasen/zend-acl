@@ -73,13 +73,14 @@ class Module implements AutoloaderProviderInterface {
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, function(MvcEvent $e) use ($whitelist, $authenticatedWhitelist, $authService, $userService) {
 			/** @var \Bugsnag\Client $bugsnag */
 			global $bugsnag;
-			$redirect = $_SERVER['REQUEST_URI'];
 
 			// Always give console users access
 			if($e->getRequest() instanceof \Zend\Console\Request) return true;
 			
 			// Can't remember what this one is for
 			if(!$e->getRouteMatch() instanceof RouteMatch) return true;
+
+			$redirect = $_SERVER['REQUEST_URI'];
 
 			// Logged in user
 			if($authService->hasIdentity()) {
