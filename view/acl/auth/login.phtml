@@ -11,6 +11,18 @@
 <?php $this->placeholder('sidebar_right')->captureStart() ?>
 <?php $this->placeholder('sidebar_right')->captureEnd() ?>
 
+<div class="well">
+    <p>Prøv vår nye Boligkalkulator v2:</p>
+
+    <p><a href="https://boligkalkulator.elfag.no">https://boligkalkulator.elfag.no</a></p>
+
+    <p>Boligkalkulator v2 er like enkel å bruke som Boligkalkulator samtidig som mulighetene til Prosjektkalkulator er videreført og forbedret.</p>
+    <p>
+        Prosjektkalkulator vil bli lagt ned 1. mars 2019.<br>
+        Alle tilbud du har laget er tilgjengelig for utskrift og visning i den nye versjonen.
+    </p>
+</div>
+
 <div style="text-align: left">
 	<br>
 	<h3>Innlogging for Elfags prosjektkalkulator og reklamasjonstjeneste</h3>
@@ -62,3 +74,9 @@
         <?= $this->flashMessenger()->renderCurrent(); ?>
 	</div>
 </div>
+
+<style>
+    a:hover {
+        font-weight: bold;
+    }
+</style>
