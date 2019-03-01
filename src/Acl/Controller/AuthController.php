@@ -64,7 +64,7 @@ class AuthController extends AbstractController {
 
 		/** @var Request $request */
 		$request = $this->getRequest();
-		if($request->isPost()) {
+		if(false) {
 			$form->setData($request->getPost());
 			if($form->isValid()) {
 				$data = $form->getData();
