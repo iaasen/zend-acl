@@ -11,6 +11,11 @@
 <?php $this->placeholder('sidebar_right')->captureStart() ?>
 <?php $this->placeholder('sidebar_right')->captureEnd() ?>
 
+
+<h1>Prosjektkalkulator er lagt ned</h1>
+
+
+
 <div class="well">
     <p>Prøv vår nye Boligkalkulator v2:</p>
 
@@ -18,62 +23,12 @@
 
     <p>Boligkalkulator v2 er like enkel å bruke som Boligkalkulator samtidig som mulighetene til Prosjektkalkulator er videreført og forbedret.</p>
     <p>
-        Prosjektkalkulator vil bli lagt ned 1. mars 2019.<br>
+        Prosjektkalkulator ble lagt ned 1. mars 2019.<br>
         Alle tilbud du har laget er tilgjengelig for utskrift og visning i den nye versjonen.
     </p>
 </div>
 
-<div style="text-align: left">
-	<br>
-	<h3>Innlogging for Elfags prosjektkalkulator og reklamasjonstjeneste</h3>
-	<br>
-	<p>
-		Dette er en lukket tjeneste kun for medlemmer av Elfag.
-	</p>
-	<br>
-	<p>
-		Gyldige kontoer
-	</p>
-		<ul>
-            <li>E-postkonto fra nye Elfag intranett (<a href="https://intranett.elfag.no">https://intranett.elfag.no</a>)</li>
-            <li>Innlogging fra gamle Elfag intranett</li>
-            <li>Lokal konto opprettet for denne siden (vanligvis fornavn)</li>
-		</ul>
-	<br>
-	<br>
-		
-		<?php
-			//$form->setAttribute('action', $this->url('auth/authenticate'));
-			
-			/*
-			foreach($oform->getElements() AS $element) {
-				switch($element->getAttribute('type')) {
-					case 'submit':
-						$element->setOptions(array('label' => 'Logg inn','column-size' => 'sm-10 col-sm-offset-2'));
-						break;
-					case 'checkbox':
-						$element->setOptions(array('label' => 'Husk meg','column-size' => 'sm-10 col-sm-offset-2'));
-						break;
-					default:
-						$element->setOptions(array('column-size' => 'sm-10', 'label_attributes' => array('class' => 'col-sm-2')));
-						break;
-				}
-			}
-			*/
-			
-			echo $this->form($form);
-			
-			//$form->prepare();
-			//echo $this->form()->openTag($form);
-			//echo $this->formCollection($form);
-			//echo $this->form()->closeTag();
-		?> 
-	
-	<div>
 
-        <?= $this->flashMessenger()->renderCurrent(); ?>
-	</div>
-</div>
 
 <style>
     a:hover {
