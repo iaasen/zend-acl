@@ -20,12 +20,12 @@ class AuthServiceFactory
 	{
 		$authLocal = $serviceManager->get(\Acl\Adapter\AuthLocalAdapter::class);
 		$authElfag2 = $serviceManager->get(\Acl\Adapter\AuthElfag2Adapter::class);
-		$authElfag = $serviceManager->get(\Acl\Adapter\AuthElfagAdapter::class);
+		//$authElfag = $serviceManager->get(\Acl\Adapter\AuthElfagAdapter::class);
 
 		$authService = new AuthService();
 		$authService->addAdapter($authLocal);
 		$authService->addAdapter($authElfag2);
-		$authService->addAdapter($authElfag);
+		//$authService->addAdapter($authElfag);
 		$authService->setStorage($serviceManager->get('Acl\Model\AclStorage'));
 		//$authService->setEventManager($serviceManager->get('EventManager'));
 		return $authService;
