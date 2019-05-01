@@ -11,7 +11,7 @@ use Zend\Form\Element\Hidden;
 use Zend\Form\Element\Password;
 use Zend\Form\Element\Select;
 use Zend\Form\Form;
-use Zend\Hydrator\ArraySerializable;
+use Zend\Hydrator\ArraySerializableHydrator;
 use Zend\InputFilter\InputFilterProviderInterface;
 use Zend\InputFilter\InputFilter;
 use Acl\Model\User;
@@ -25,7 +25,7 @@ class EditUserForm extends Form implements InputFilterProviderInterface {
 		parent::__construct('useredit');
 		$this->setAttribute('method', 'post');
 		//$this->setAttribute('autocomplete', 'off');
-		$this->setHydrator(new ArraySerializable());
+		$this->setHydrator(new ArraySerializableHydrator());
 		$this->setInputFilter(new InputFilter());
 		$this->setObject(new User());
 		

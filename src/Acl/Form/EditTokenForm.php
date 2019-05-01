@@ -3,9 +3,8 @@
 namespace Acl\Form;
 
 use Zend\Form\Form;
-use Zend\Hydrator\ArraySerializable;
+use Zend\Hydrator\ArraySerializableHydrator;
 use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\Stdlib\Hydrator\ArraySerializable as ArrayHydrator;
 use Zend\InputFilter\InputFilter;
 use Acl\Model\User;
 
@@ -15,7 +14,7 @@ class EditTokenForm extends Form implements InputFilterProviderInterface {
 		// we want to ignore the name passed
 		parent::__construct('useredit');
 		$this->setAttribute('method', 'post');
-		$this->setHydrator(new ArraySerializable());
+		$this->setHydrator(new ArraySerializableHydrator());
 		$this->setInputFilter(new InputFilter());
 		$this->setObject(new User());
 		

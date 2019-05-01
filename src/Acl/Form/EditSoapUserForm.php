@@ -3,9 +3,8 @@
 namespace Acl\Form;
 
 use Zend\Form\Form;
-use Zend\Hydrator\ArraySerializable;
+use Zend\Hydrator\ArraySerializableHydrator;
 use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\Stdlib\Hydrator\ArraySerializable as ArrayHydrator;
 use Zend\InputFilter\InputFilter;
 use Acl\Model\User;
 
@@ -15,7 +14,7 @@ class EditSoapUserForm extends Form implements InputFilterProviderInterface {
 		parent::__construct('soapuseredit');
 		$this->setAttribute('method', 'post');
 		$this->setAttribute('autocomplete', 'off');
-		$this->setHydrator(new ArraySerializable());
+		$this->setHydrator(new ArraySerializableHydrator());
 		$this->setInputFilter(new InputFilter());
 		$this->setObject(new User());
 		
