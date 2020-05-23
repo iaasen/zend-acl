@@ -33,12 +33,12 @@ return [
 		'aliases' => [
 			'Acl\AuthService' => \Acl\Service\AuthService::class,
 			'Acl\Model\AclTable' => \Acl\Service\UserTable::class,
-			'AuthService'	=> \Acl\Service\AuthService::class ,
+			'AuthService'	=> \Acl\Service\AuthService::class,
 			'Group' => \Acl\Model\Group::class,
 			'GroupTable' => \Acl\Service\GroupTable::class,
 			'User' => \Acl\Model\User::class,
 			'UserTable' => \Acl\Service\UserTable::class,
-			\Zend\Authentication\AuthenticationService::class => \Acl\Service\AuthService::class,
+			\Laminas\Authentication\AuthenticationService::class => \Acl\Service\AuthService::class,
 		],
 		'initializers' => [
 			\Acl\Initializer\CurrentUserInitializer::class,
@@ -57,7 +57,8 @@ return [
 	],
 	'view_helpers' => [
 		'aliases' => [
-			\Zend\Authentication\AuthenticationService::class => \Acl\Service\AuthService::class,
+			'AuthService' => \Acl\Service\AuthService::class,
+			\Laminas\Authentication\AuthenticationService::class => \Acl\Service\AuthService::class,
 			'groupselection' => \Acl\View\Helper\GroupSelectionWidget::class,
 		],
 		'factories' => [
@@ -243,7 +244,7 @@ return [
 						]
 					],
 					'create-elfag2-group' => [
-						'type' => \Zend\Router\Http\Literal::class,
+						'type' => \Laminas\Router\Http\Literal::class,
 						'options' => [
 							'route' => '/nytt-firma',
 							'defaults' => [
@@ -252,7 +253,7 @@ return [
 						]
 					],
 					'missing-elfag2-group' => [
-						'type' => \Zend\Router\Http\Literal::class,
+						'type' => \Laminas\Router\Http\Literal::class,
 						'options' => [
 							'route' => '/nytt-firma/mangler',
 							'defaults' => [
@@ -261,7 +262,7 @@ return [
 						]
 					],
 					'noAccess' => [
-						'type' => \Zend\Router\Http\Literal::class,
+						'type' => \Laminas\Router\Http\Literal::class,
 						'options' => [
 							'route' => '/ingen-tilgang',
 							'defaults' => [

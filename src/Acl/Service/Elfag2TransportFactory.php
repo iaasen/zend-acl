@@ -9,7 +9,7 @@
 namespace Acl\Service;
 
 
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class Elfag2TransportFactory
 {

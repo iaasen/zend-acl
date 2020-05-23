@@ -10,7 +10,7 @@ namespace Acl\Adapter;
 
 
 use Iaasen\Messenger\SessionMessenger;
-use Zend\Authentication\Adapter\AbstractAdapter;
+use Laminas\Authentication\Adapter\AbstractAdapter;
 
 
 abstract class AbstractAuthAdapter extends AbstractAdapter

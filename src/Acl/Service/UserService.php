@@ -13,7 +13,7 @@ use Acl\Model\Access;
 use Acl\Model\CurrentUser;
 use Acl\Model\Group;
 use Acl\Model\User;
-use Zend\Http\PhpEnvironment\Request;
+use Laminas\Http\PhpEnvironment\Request;
 use Oppned\Message;
 
 class UserService
@@ -56,7 +56,7 @@ class UserService
 
 	public function getCurrentUser() : CurrentUser {
 		// Console user
-		if($this->request instanceof \Zend\Console\Request) {
+		if($this->request instanceof \Laminas\Console\Request) {
 			if(self::$currentIdentity == 'console') return self::$currentUser;
 
 			$currentUser = new CurrentUser();

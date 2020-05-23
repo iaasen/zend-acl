@@ -5,25 +5,25 @@ use Acl\Adapter\AuthElfag2Adapter;
 use Acl\Service\AuthService;
 use Acl\Service\Elfag2Service;
 use Acl\Service\UserService;
-use Zend\Db\TableGateway\TableGateway;
-use Zend\EventManager\Event;
-use Zend\EventManager\EventManager;
-use Zend\Http\PhpEnvironment\Response;
-use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
-use Zend\Mvc\ModuleRouteListener;
-use Zend\Mvc\MvcEvent;
-use Zend\Router\Http\RouteMatch;
-use Zend\ServiceManager\ServiceManager;
-use Zend\Session\SessionManager;
-use Zend\Session\Container;
-use Zend\Session\SaveHandler\DbTableGateway;
-use Zend\Session\SaveHandler\DbTableGatewayOptions;
+use Laminas\Db\TableGateway\TableGateway;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\EventManager;
+use Laminas\Http\PhpEnvironment\Response;
+use Laminas\ModuleManager\Feature\AutoloaderProviderInterface;
+use Laminas\Mvc\ModuleRouteListener;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Router\Http\RouteMatch;
+use Laminas\ServiceManager\ServiceManager;
+use Laminas\Session\SessionManager;
+use Laminas\Session\Container;
+use Laminas\Session\SaveHandler\DbTableGateway;
+use Laminas\Session\SaveHandler\DbTableGatewayOptions;
 
 
 class Module implements AutoloaderProviderInterface {
 	public function getAutoloaderConfig() {
 		return [
-			'Zend\Loader\StandardAutoloader' => [
+			\Laminas\Loader\StandardAutoloader::class => [
 				'namespaces' => [
 					__NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
 				],
@@ -75,7 +75,7 @@ class Module implements AutoloaderProviderInterface {
 			global $bugsnag;
 
 			// Always give console users access
-			if($e->getRequest() instanceof \Zend\Console\Request) return true;
+			if($e->getRequest() instanceof \Laminas\Console\Request) return true;
 			
 			// Can't remember what this one is for
 			if(!$e->getRouteMatch() instanceof RouteMatch) return true;
@@ -155,10 +155,10 @@ class Module implements AutoloaderProviderInterface {
 	
 	public function bootstrapSession(MvcEvent $e)
 	{
-		/** @var \Zend\Session\SessionManager $session */
+		/** @var \Laminas\Session\SessionManager $session */
 		$session = $e->getApplication()
 			->getServiceManager()
-			->get('Zend\Session\SessionManager');
+			->get(\Laminas\Session\SessionManager::class);
 		$session->start();
 	}
 	
@@ -169,14 +169,14 @@ class Module implements AutoloaderProviderInterface {
 	public function getServiceConfig() {
 		return [
 			'factories' => [
-				'Zend\Session\SessionManager' => function (ServiceManager $sm) {
+				\Laminas\Session\SessionManager::class => function (ServiceManager $sm) {
 					$conf = $sm->get('config');
 					$conf = $conf['session'];
 				
 					$sessionConfig = null;
 					if (isset($conf['config'])) {
 						$options = isset($conf['config']['options']) ? $conf['config']['options'] : [];
-						$sessionConfig = new \Zend\Session\Config\SessionConfig();
+						$sessionConfig = new \Laminas\Session\Config\SessionConfig();
 						$sessionConfig->setOptions($options);
 					}
 				

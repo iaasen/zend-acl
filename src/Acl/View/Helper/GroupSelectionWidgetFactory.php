@@ -11,15 +11,15 @@ namespace Acl\View\Helper;
 
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
-use Zend\View\HelperPluginManager;
+use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
+use Laminas\ServiceManager\Exception\ServiceNotFoundException;
+use Laminas\ServiceManager\Factory\FactoryInterface;
+use Laminas\View\HelperPluginManager;
 
 class GroupSelectionWidgetFactory implements FactoryInterface
 {
 //	/**
-//	 * @param \Zend\View\HelperPluginManager $helperManager
+//	 * @param \Laminas\View\HelperPluginManager $helperManager
 //	 * @return GroupSelectionWidget
 //	 */
 //	public function __invoke($helperManager)

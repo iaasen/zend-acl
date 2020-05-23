@@ -4,10 +4,10 @@ namespace Acl\Form;
 use Oppned\Form\Element\Checkbox;
 use Oppned\Form\Element\Submit;
 use Oppned\Form\Element\Text;
-use Zend\Form\Element\Password;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\Validator\StringLength;
+use Laminas\Form\Element\Password;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
+use Laminas\Validator\StringLength;
 
 class LoginForm extends Form implements InputFilterProviderInterface {
 	public function __construct($name = null) {
@@ -57,7 +57,7 @@ class LoginForm extends Form implements InputFilterProviderInterface {
 
 	/**
 	 * Should return an array specification compatible with
-	 * {@link Zend\InputFilter\Factory::createInputFilter()}.
+	 * {@link Laminas\InputFilter\Factory::createInputFilter()}.
 	 *
 	 * @return array
 	 */

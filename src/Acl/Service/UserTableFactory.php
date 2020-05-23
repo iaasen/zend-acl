@@ -8,9 +8,9 @@
 namespace Acl\Service;
 
 
-use Zend\Db\ResultSet\ResultSet;
-use Zend\Db\TableGateway\TableGateway;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\Db\ResultSet\ResultSet;
+use Laminas\Db\TableGateway\TableGateway;
+use Laminas\ServiceManager\ServiceManager;
 
 class UserTableFactory
 {
@@ -20,7 +20,7 @@ class UserTableFactory
 	 */
 	public function __invoke($serviceManager)
 	{
-		/** @var \Zend\Db\Adapter\Adapter $dbAdapter */
+		/** @var \Laminas\Db\Adapter\Adapter $dbAdapter */
 		$dbAdapter = $serviceManager->get('Db\Acl');
 		$resultSetPrototype = new ResultSet();
 		$userPrototype = $serviceManager->get(\Acl\Model\User::class);

@@ -8,7 +8,7 @@
 namespace Acl\Model;
 
 
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class AclStorageFactory
 {

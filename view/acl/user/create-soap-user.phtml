@@ -4,13 +4,14 @@ $access = $this->access;
 $title = $this->translate('New SOAP-account');
 $this->headTitle($title);
 
-$form = $this->makeFormHorizontal($form);
-$this->form($form, \TwbBundle\Form\View\Helper\TwbBundleForm::LAYOUT_HORIZONTAL);
+$this->getHelperPluginManager()->setAlias('formRow', \Iaasen\View\Helper\FormRowHorizontal::class);
+$this->formCollection()->setDefaultElementHelper('formRowHorizontal');
+$form = $this->form;
+$form->setAttribute('class', 'form-horizontal');
+$form->prepare();
 
 $menuContainer = $this->navigation('navigation')->getContainer();
-
 $menuContainer->findOneBy('route', 'user/createSoapUser')->setActive();
-
 
 ?>
 
@@ -23,15 +24,12 @@ $menuContainer->findOneBy('route', 'user/createSoapUser')->setActive();
 
 
 <div class="form">
-<h1><?php echo $title ?></h1>
+<h1><?= $title ?></h1>
 
 <?php
-$form = $this->form;
-$form->prepare();
-echo $this->form()->openTag($form);
-echo $this->formcollection($form);
-echo $this->form()->closeTag($form);
-
+    echo $this->form()->openTag($form);
+    echo $this->formCollection($form);
+    echo $this->form()->closeTag($form);
 ?>
 
 </div>

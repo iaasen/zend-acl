@@ -11,7 +11,7 @@ namespace Acl\Model;
 
 use Acl\Service\UserService;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class CurrentUserFactory implements FactoryInterface
 {

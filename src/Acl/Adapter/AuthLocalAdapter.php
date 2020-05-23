@@ -2,9 +2,9 @@
 
 namespace Acl\Adapter;
 
-use Zend\Authentication\Adapter\DbTable\AbstractAdapter AS AbstractDbAdapter;
-use Zend\Authentication\Result;
-use Zend\Crypt\Password\Bcrypt;
+use Laminas\Authentication\Adapter\DbTable\AbstractAdapter AS AbstractDbAdapter;
+use Laminas\Authentication\Result;
+use Laminas\Crypt\Password\Bcrypt;
 
 class AuthLocalAdapter extends AbstractDbAdapter {
 
@@ -12,8 +12,8 @@ class AuthLocalAdapter extends AbstractDbAdapter {
 	/**
 	 * Performs an authentication attempt
 	 *
-	 * @return \Zend\Authentication\Result
-	 * @throws \Zend\Authentication\Adapter\Exception\ExceptionInterface If authentication cannot be performed
+	 * @return \Laminas\Authentication\Result
+	 * @throws \Laminas\Authentication\Adapter\Exception\ExceptionInterface If authentication cannot be performed
 	 */
 	public function authenticateValidateResult($resultIdentity) {
 		$bcrypt = new Bcrypt();

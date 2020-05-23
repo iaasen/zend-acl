@@ -9,10 +9,10 @@ use Acl\Service\UserService;
 use Acl\Service\UserTable;
 use Iaasen\Controller\AbstractController;
 use Iaasen\Messenger\SessionMessenger;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\Http\Response;
-use Zend\View\Model\ViewModel;
-use Zend\Crypt\Password\Bcrypt;
+use Laminas\Http\PhpEnvironment\Request;
+use Laminas\Http\Response;
+use Laminas\View\Model\ViewModel;
+use Laminas\Crypt\Password\Bcrypt;
 
 class AuthController extends AbstractController {
 
@@ -51,7 +51,7 @@ class AuthController extends AbstractController {
 
 
 	/**
-	 * @return mixed|\Zend\Authentication\Result|Response|ViewModel
+	 * @return mixed|\Laminas\Authentication\Result|Response|ViewModel
 	 * @throws \Exception
 	 */
 	public function loginAction() {

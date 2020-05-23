@@ -5,8 +5,8 @@ namespace Acl\Service;
 use Acl\Model\Group;
 use Acl\Model\User;
 use Iaasen\Service\AbstractTable;
-use Zend\Db\Sql\Sql;
-use Zend\Db\TableGateway\TableGateway;
+use Laminas\Db\Sql\Sql;
+use Laminas\Db\TableGateway\TableGateway;
 use Oppned\Message;
 
 class UserTable extends AbstractTable {
@@ -154,14 +154,14 @@ class UserTable extends AbstractTable {
 	}
 	
 	public function getUserAccess(User $user) {
-		$select = new \Zend\Db\Sql\Select();
+		$select = new \Laminas\Db\Sql\Select();
 		$select->from('users');
 		$select->join('users_has_groups', 'users_has_groups.users_id = users.id');
 		$select->join('groups', 'groups.id = users_has_groups.groups_id');
 		$select->where(array (
 			'users.id' => $user->id
 		));
-		//echo $select->getSqlString(new \Zend\Db\Adapter\Platform\Mysql());
+		//echo $select->getSqlString(new \Laminas\Db\Adapter\Platform\Mysql());
 		
 		$sql = new Sql($this->primaryGateway->getAdapter());
 		$statement = $sql->prepareStatementForSqlObject($select);

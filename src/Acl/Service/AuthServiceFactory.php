@@ -8,7 +8,7 @@
 namespace Acl\Service;
 
 
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class AuthServiceFactory
 {
@@ -26,7 +26,7 @@ class AuthServiceFactory
 		$authService->addAdapter($authLocal);
 		$authService->addAdapter($authElfag2);
 		//$authService->addAdapter($authElfag);
-		$authService->setStorage($serviceManager->get('Acl\Model\AclStorage'));
+		$authService->setStorage($serviceManager->get(\Acl\Model\AclStorage::class));
 		//$authService->setEventManager($serviceManager->get('EventManager'));
 		return $authService;
 	}

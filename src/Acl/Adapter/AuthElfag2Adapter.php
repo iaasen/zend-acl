@@ -11,10 +11,10 @@ namespace Acl\Adapter;
 
 use GuzzleHttp\Exception\ClientException;
 use Iaasen\Transport\HttpTransportInterface;
-use Zend\Authentication\Result;
-use Zend\EventManager\EventManager;
-use Zend\EventManager\EventManagerAwareInterface;
-use Zend\EventManager\EventManagerInterface;
+use Laminas\Authentication\Result;
+use Laminas\EventManager\EventManager;
+use Laminas\EventManager\EventManagerAwareInterface;
+use Laminas\EventManager\EventManagerInterface;
 
 class AuthElfag2Adapter extends AbstractAuthAdapter implements EventManagerAwareInterface
 {

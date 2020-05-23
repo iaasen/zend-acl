@@ -9,9 +9,9 @@
 namespace Acl\Service;
 
 
-use Zend\Db\ResultSet\ResultSet;
-use Zend\Db\TableGateway\TableGateway;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\Db\ResultSet\ResultSet;
+use Laminas\Db\TableGateway\TableGateway;
+use Laminas\ServiceManager\ServiceManager;
 
 class AccessTableFactory
 {
@@ -21,7 +21,7 @@ class AccessTableFactory
 	 */
 	public function __invoke($sm)
 	{
-		/** @var \Zend\Db\Adapter\Adapter $dbAdapter */
+		/** @var \Laminas\Db\Adapter\Adapter $dbAdapter */
 		$dbAdapter = $sm->get('Db\Acl');
 		$resultSetPrototype = new ResultSet();
 		$resultSetPrototype->setArrayObjectPrototype($sm->get(\Acl\Model\Access::class));

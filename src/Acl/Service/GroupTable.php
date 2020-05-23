@@ -5,7 +5,7 @@ namespace Acl\Service;
 use Acl\Model\Group;
 use Iaasen\Exception\NotFoundException;
 use Iaasen\Service\AbstractTable;
-use Zend\Db\Sql\Select;
+use Laminas\Db\Sql\Select;
 
 class GroupTable extends AbstractTable {
 	/** @var  \Acl\Service\AuthService */

@@ -2,9 +2,9 @@
 
 namespace Acl\Service;
 
-use Zend\Authentication\AuthenticationService;
-use Zend\Authentication\Adapter\AdapterInterface;
-use Zend\Authentication\Result;
+use Laminas\Authentication\AuthenticationService;
+use Laminas\Authentication\Adapter\AdapterInterface;
+use Laminas\Authentication\Result;
 
 class AuthService extends AuthenticationService {
 
@@ -15,7 +15,7 @@ class AuthService extends AuthenticationService {
 	/** @var  string */
 	public $credential;
 
-	/** @var  \Zend\EventManager\EventManager */
+	/** @var  \Laminas\EventManager\EventManager */
 	protected $eventManager;
 	
 	public function setAdapter(AdapterInterface $adapter) {
@@ -40,9 +40,9 @@ class AuthService extends AuthenticationService {
 	/**
 	 * authenticate is extended to allow for multiple adapters
 	 * identity/credential is set for each adapter;
-	 * @see \Zend\Authentication\AuthenticationService::authenticate()
+	 * @see \Laminas\Authentication\AuthenticationService::authenticate()
 	 * @param AdapterInterface|null $adapter
-	 * @return \Zend\Authentication\Result
+	 * @return \Laminas\Authentication\Result
 	 */
 	public function authenticate(AdapterInterface $adapter = null) {
 		if($adapter) $adapters = array($adapter);
@@ -60,6 +60,7 @@ class AuthService extends AuthenticationService {
 			
 			if($result->isValid()) {
 				$this->getStorage()->write($result->getIdentity());
+
 				//$this->eventManager->trigger('login_successful', null, ['identity' => $result->getIdentity()]);
 				return $result;
 			}

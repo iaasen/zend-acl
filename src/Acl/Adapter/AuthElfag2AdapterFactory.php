@@ -9,7 +9,7 @@
 namespace Acl\Adapter;
 
 
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class AuthElfag2AdapterFactory
 {

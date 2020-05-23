@@ -4,19 +4,19 @@ namespace Acl\Form;
 
 use Priceestimator\Form\Element\Submit;
 use Priceestimator\Form\Element\Text;
-use Zend\Filter\StringTrim;
-use Zend\Filter\StripTags;
-use Zend\Filter\ToInt;
-use Zend\Form\Element\Hidden;
-use Zend\Form\Element\Password;
-use Zend\Form\Element\Select;
-use Zend\Form\Form;
-use Zend\Hydrator\ArraySerializableHydrator;
-use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\InputFilter\InputFilter;
+use Laminas\Filter\StringTrim;
+use Laminas\Filter\StripTags;
+use Laminas\Filter\ToInt;
+use Laminas\Form\Element\Hidden;
+use Laminas\Form\Element\Password;
+use Laminas\Form\Element\Select;
+use Laminas\Form\Form;
+use Laminas\Hydrator\ArraySerializableHydrator;
+use Laminas\InputFilter\InputFilterProviderInterface;
+use Laminas\InputFilter\InputFilter;
 use Acl\Model\User;
-use Zend\Validator\Identical;
-use Zend\Validator\StringLength;
+use Laminas\Validator\Identical;
+use Laminas\Validator\StringLength;
 
 class EditUserForm extends Form implements InputFilterProviderInterface {
 

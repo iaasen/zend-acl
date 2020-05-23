@@ -1,10 +1,10 @@
 <?php
 namespace Acl\Form;
 
-//use Zend\Captcha\AdapterInterface as CaptchaAdapter;
-//use Zend\Form\Element;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
+//use Laminas\Captcha\AdapterInterface as CaptchaAdapter;
+//use Laminas\Form\Element;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
 use Acl\Model\User;
 
 class CreateUserForm extends Form implements InputFilterProviderInterface {

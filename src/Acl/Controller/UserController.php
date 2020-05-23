@@ -5,14 +5,14 @@ namespace Acl\Controller;
 use Acl\Adapter\AuthLocalAdapter;
 use Acl\Service\Elfag2Service;
 use Iaasen\Exception\NotFoundException;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
+use Laminas\Http\PhpEnvironment\Request;
+use Laminas\Mvc\Controller\AbstractActionController;
+use Laminas\View\Model\ViewModel;
 use Acl\Form\CreateUserForm;
 use Acl\Form\EditUserForm;
 use Acl\Form\EditSoapUserForm;
 use Acl\Model\User;
-use Zend\Crypt\Password\Bcrypt;
+use Laminas\Crypt\Password\Bcrypt;
 use Oppned\Message;
 
 /**
@@ -50,7 +50,7 @@ class UserController extends AbstractActionController {
 		$this->authLocalAdapter = $authLocalAdapter;
 	}
 
-//	public function onDispatch(\Zend\Mvc\MvcEvent $e) {
+//	public function onDispatch(\Laminas\Mvc\MvcEvent $e) {
 //		//$this->getServiceLocator()->get('ViewHelperManager')->get('menu')->mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
 //		//MenuWidget::mainMenu($this->getServiceLocator()->get('Acl\AuthService')->hasIdentity(), 'settings');
 //		return parent::onDispatch($e);
@@ -383,7 +383,7 @@ class UserController extends AbstractActionController {
 	}
 
 	/**
-	 * @return array|\Zend\Http\Response
+	 * @return array|\Laminas\Http\Response
 	 * @throws \Exception
 	 */
 	public function createElfag2GroupAction() {

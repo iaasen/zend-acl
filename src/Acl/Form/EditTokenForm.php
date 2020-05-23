@@ -2,10 +2,10 @@
 
 namespace Acl\Form;
 
-use Zend\Form\Form;
-use Zend\Hydrator\ArraySerializableHydrator;
-use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\InputFilter\InputFilter;
+use Laminas\Form\Form;
+use Laminas\Hydrator\ArraySerializableHydrator;
+use Laminas\InputFilter\InputFilterProviderInterface;
+use Laminas\InputFilter\InputFilter;
 use Acl\Model\User;
 
 class EditTokenForm extends Form implements InputFilterProviderInterface {

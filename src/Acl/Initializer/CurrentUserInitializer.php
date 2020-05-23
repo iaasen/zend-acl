@@ -11,7 +11,7 @@ namespace Acl\Initializer;
 
 use Acl\Service\UserService;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Initializer\InitializerInterface;
+use Laminas\ServiceManager\Initializer\InitializerInterface;
 
 class CurrentUserInitializer implements InitializerInterface
 {

@@ -2,8 +2,8 @@
 
 namespace Acl\Adapter;
 
-use Zend\Authentication\Adapter\AbstractAdapter;
-use Zend\Authentication\Result;
+use Laminas\Authentication\Adapter\AbstractAdapter;
+use Laminas\Authentication\Result;
 
 class AuthElfagAdapter extends AbstractAdapter {
 
@@ -24,8 +24,8 @@ class AuthElfagAdapter extends AbstractAdapter {
 	/**
 	 * Performs an authentication attempt
 	 *
-	 * @return \Zend\Authentication\Result
-	 * @throws \Zend\Authentication\Adapter\Exception\ExceptionInterface If authentication cannot be performed
+	 * @return \Laminas\Authentication\Result
+	 * @throws \Laminas\Authentication\Adapter\Exception\ExceptionInterface If authentication cannot be performed
 	 */
 	public function authenticate() {
 		$this->identity = strtolower($this->identity);

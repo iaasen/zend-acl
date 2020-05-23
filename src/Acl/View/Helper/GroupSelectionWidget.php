@@ -1,10 +1,10 @@
 <?php
 namespace Acl\View\Helper;
 
-use Zend\View\Helper\AbstractHelper;
-use Zend\View\Model\ViewModel;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Laminas\View\Helper\AbstractHelper;
+use Laminas\View\Model\ViewModel;
+use Laminas\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\ServiceLocatorAwareInterface;
 
 
 class GroupSelectionWidget extends AbstractHelper

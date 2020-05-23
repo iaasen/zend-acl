@@ -1,7 +1,7 @@
 <?php
 namespace Acl\Model;
 
-use Zend\Authentication\Storage;
+use Laminas\Authentication\Storage;
 
 class AclStorage extends Storage\Session {
 	public function setRememberMe($_rememberMe = 0, $time = 1209600) {

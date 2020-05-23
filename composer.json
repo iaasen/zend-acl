@@ -1,6 +1,6 @@
 {
   "name": "iaasen/zend-acl",
-  "description": "Zend authentication implementation",
+  "description": "Laminas authentication implementation",
   "type": "library",
   "license": "proprietary",
   "authors": [
