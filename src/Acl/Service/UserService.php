@@ -54,9 +54,17 @@ class UserService
 		return self::$currentGroup;
 	}
 
+
+	protected function isConsoleRequest() {
+		return
+			$this->request->getServer()->get('SHELL') !== null ||
+			$this->request instanceof \Laminas\Console\Request;
+	}
+
+
 	public function getCurrentUser() : CurrentUser {
 		// Console user
-		if($this->request instanceof \Laminas\Console\Request) {
+		if($this->isConsoleRequest()) {
 			if(self::$currentIdentity == 'console') return self::$currentUser;
 
 			$currentUser = new CurrentUser();

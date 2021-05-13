@@ -156,6 +156,12 @@ class User extends AbstractModel {
 		return $options;
 	}
 
+
+	public function isConsoleUser() : bool {
+		return $this->logintype == 'console';
+	}
+
+
 	/**
 	 * Called by $form->bind()
 	 *
@@ -205,10 +211,8 @@ class User extends AbstractModel {
 		switch ($name) {
 			case 'access' :
 				return $this->access;
-				break;
 			default :
 				return parent::__get($name);
-				break;
 		}
 	}
 
