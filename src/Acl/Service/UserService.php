@@ -55,10 +55,13 @@ class UserService
 	}
 
 
-	protected function isConsoleRequest() {
+	protected function isConsoleRequest() : bool {
 		return
-			$this->request->getServer()->get('SHELL') !== null ||
-			$this->request instanceof \Laminas\Console\Request;
+			$this->request instanceof \Laminas\Console\Request ||
+			(
+				method_exists($this->request, 'getServer') &&
+				$this->request->getServer()->get('SHELL') !== null
+			);
 	}
 
 
